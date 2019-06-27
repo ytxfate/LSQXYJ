@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Socket.io</title>
+  <link rel="stylesheet" href="/stylesheets/centos.css">
+  <!-- socket.io -->
+  <script src="/javascripts/socket.io.js"></script>
+  <!-- jQuery -->
+  <script type="text/javascript" src="/javascripts/jquery-3.3.1.slim.min.js"></script>
+  <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
+  <script type="text/javascript" src="/javascripts/jquery.cookie.min.js"></script>
+  <!-- bootstrap -->
+  <link rel="stylesheet" href="/stylesheets/bootstrap.min.css">
+  <script type="text/javascript" src="/javascripts/bootstrap.min.js"></script>
+  <script type="text/javascript" src="/javascripts/popper.min.js"></script>
+  <!-- jQuery UI -->
+  <link rel="stylesheet" href="/stylesheets/jquery-ui.css">
+  <script type="text/javascript" src="/javascripts/jquery-ui.min.js"></script>
+  <!-- echarts -->
+  <script src="/javascripts/echarts.min.js"></script>
+  <script src="/javascripts/echarts-gl.min.js"></script>
+</head>
+
+<body>
+  <div class="container">
+    <div class="dash_board">
+      <div id="cpu_info" class="cpu_info"></div>
+      <div id="memery_info" class="memery_info"></div>
+    </div>
+    <!-- CPU 仪表盘 -->
+    <script>
+      var cpu_chart = echarts.init(document.getElementById('cpu_info'));
+      cpu_option = {
+        title: {
+          x: "center",
+          bottom: 20,
+          text: 'CPU使用率',
+          textStyle: {
+            fontWeight: 'normal',
+            fontSize: 18,
+            color: "#323232"
+          },
+        },
+        tooltip: {
+          show: true,
+        },
+        backgroundColor: "#ffffff",
+        // color: ["#37A2DA", "#32C5E9", "#67E0E3"],
+        series: [{
+          name: 'CPU使用率',
+          type: 'gauge',
+          detail: {
+            formatter: '{value}%',
+            textStyle: {
+              fontWeight: 'normal',
+              fontSize: 18,
+              // color: "#323232"
+            },
+          },
+          axisLine: {
+            show: true,
+            lineStyle: {
+              width: 30,
+              shadowBlur: 0,
+              color: [
+                [0.3, '#54FF9F'],
+                [0.7, '#FFD700'],
+                [1, '#fd666d']
+              ]
+            }
+          },
+          data: [{
+            value: 0,
+            // name: 'CPU使用率',
+          }]
+        }]
+      };
+      cpu_chart.setOption(cpu_option, true);
+
+
+      var socket = io.connect('http://127.0.0.1:5552', {
+        'reconnect': true
+      });
+      var session_id = $.cookie('session_id');
+      socket.on('connect', function () {
+        socket.emit('cpu_info', {
+          'session_id': session_id
+        });
+        console.log('connect...');
+        socket.on('resp_cpu_info', function (data) {
+          console.log(data);
+          cpu_option.series[0].data[0].value = (data.msg.cpu_use * 100).toFixed(2);
+          cpu_chart.setOption(cpu_option, true);
+          socket.emit('cpu_info', {
+            'session_id': session_id
+          });
+        });
+      });
+      socket.on('disconnect', function () {
+        console.log('connection is close!');
+      })
+    </script>
+  </div>
+</body>
+
+</html>

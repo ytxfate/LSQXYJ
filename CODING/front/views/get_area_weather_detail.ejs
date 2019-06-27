@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <link rel="Shortcut Icon" href="/images/favicon.ico">
+  <meta charset="UTF-8">
+  <title>
+    <%= area %>
+  </title>
+  <link rel="stylesheet" href="/stylesheets/style.css">
+  <link rel="stylesheet" href="/stylesheets/get_area_weather_detail.css">
+  <!-- jQuery -->
+  <script type="text/javascript" src="/javascripts/jquery-3.3.1.slim.min.js"></script>
+  <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
+  <script type="text/javascript" src="/javascripts/jquery.cookie.min.js"></script>
+  <!-- 图标 -->
+  <link rel="stylesheet" href="/stylesheets/font-awesome.min.css">
+  <!-- 滑动验证 -->
+  <link rel="stylesheet" href="/stylesheets/jquery.slider.css">
+  <!-- bootstrap -->
+  <link rel="stylesheet" href="/stylesheets/bootstrap.min.css">
+  <script type="text/javascript" src="/javascripts/bootstrap.min.js"></script>
+  <script type="text/javascript" src="/javascripts/popper.min.js"></script>
+  <!-- jQuery UI -->
+  <link rel="stylesheet" href="/stylesheets/jquery-ui.css">
+  <script type="text/javascript" src="/javascripts/jquery-ui.min.js"></script>
+  <!-- echarts -->
+  <script src="/javascripts/echarts.min.js"></script>
+  <script src="/javascripts/echarts-gl.min.js"></script>
+  <script>
+    var county = '<%= father %>';
+    var area_name = '<%= area %>';
+    var base_url = '/api';
+
+    Date.prototype.format = function (fmt) {
+      var o = {
+        "M+": this.getMonth() + 1, //月份 
+        "d+": this.getDate(), //日 
+        "h+": this.getHours(), //小时 
+        "m+": this.getMinutes(), //分 
+        "s+": this.getSeconds(), //秒 
+        "q+": Math.floor((this.getMonth() + 3) / 3), //季度 
+        "S": this.getMilliseconds() //毫秒 
+      };
+      if (/(y+)/.test(fmt)) {
+        fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+      }
+      for (var k in o) {
+        if (new RegExp("(" + k + ")").test(fmt)) {
+          fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+        }
+      }
+      return fmt;
+    }
+  </script>
+</head>
+
+<body>
+  <div class="container main_body">
+    <div class="top_info">
+      <h3>凉山气象预报预警系统</h3>
+      <p>为你提供凉山地区详细的天气预报及预警信息。</p>
+    </div>
+    <div class="nav_div">
+      <div class="nav_left_div">
+        <ul class="nav">
+          <li class="nav-item">
+            <a class="nav-link" href="/">&#8249; 首页</a>
+          </li>
+        </ul>
+      </div>
+      <div class="nav_right_div" id="nav_right_div"></div>
+      <div class="user_dev">
+        <i id="user_head_font" class="fa fa-user user_head_font" style="font-size:40px;"></i>
+        <script>
+          $(document).ready(function () {
+            $('#user_head_font').click()
+          })
+        </script>
+        <div class="user_operate_dev">
+
+        </div>
+        <!-- user login 模态框 -->
+        <div class="modal fade" id="user_login" style="margin-top: 150px;">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <!-- 模态框头部 -->
+              <div class="modal-header">
+                <h4 class="modal-title">用户登录</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+              </div>
+              <!-- 模态框主体 -->
+              <div class="modal-body">
+                <!-- <form> -->
+                <div class="form-group">
+                  <label for="usr">用户名:</label>
+                  <input type="text" class="form-control" id="username" maxlength="20">
+                </div>
+                <div class="form-group">
+                  <label for="pwd">密&nbsp;&nbsp;码:</label>
+                  <input type="password" class="form-control" id="password" maxlength="20">
+                </div>
+                <div class="form-group">
+                  <div id="user_login_slider" class="slider"></div>
+                </div>
+                <!-- 滑动验证 -->
+                <script type="text/javascript" src="/javascripts/jquery.slider.min.js"></script>
+                <script>
+                  $("#user_login_slider").slider({
+                    callback: function (result) {
+                      if (result === true) {
+                        $("#login_system").removeClass('disabled');
+                      }
+                    }
+                  });
+                </script>
+                <!-- </form> -->
+                <div class="login_show">
+                  <div class="alert alert-info">
+                    <strong>提示!</strong> 欢迎登录凉山气象预报预警系统。
+                  </div>
+                </div>
+                <a href="/user/forget_password" target="_top" class="float-right">忘记密码（找回密码）</a>
+              </div>
+              <!-- 模态框底部 -->
+              <div class="modal-footer">
+                <button type="button" class="btn btn-primary disabled" id='login_system'>登录</button>
+                <button type="button" class="btn btn-primary" id='register_user'>注册</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+              </div>
+              <script>
+                $(document).ready(function () {
+                  // 注册
+                  $('#register_user').click(function () {
+                    window.open('/user/register', '_top');
+                  });
+                  // 登录
+                  $('#login_system').click(function () {
+                    if ($('#login_system').hasClass('disabled')) {
+                      return;
+                    }
+                    var username = $('#username').val().replace(' ', '');
+                    var password = $('#password').val().replace(' ', '');
+                    if (username === '' || password === '') {
+                      var mes_div_html = '' +
+                        '<div class="alert alert-warning">' +
+                        '<strong>警告!</strong> 用户名或密码为空！' +
+                        '</div>';
+                      $('.login_show').html(mes_div_html);
+                      $("#user_login_slider").slider('restore');
+                      $("#login_system").addClass('disabled');
+                    } else {
+                      $.ajax({
+                        method: 'post',
+                        async: true,
+                        cache: false,
+                        // 数据类型必须为application/x-www-form-urlencoded之外的类型
+                        contentType: 'application/json;charset=utf-8',
+                        dataType: "json", // 数据返回类型
+                        url: '/api/user/login',
+                        data: JSON.stringify({
+                          "username": username,
+                          "password": password
+                        }),
+                        success: function (res) {
+                          if (res.login_status === 'ERROR') {
+                            $("#login_slider").slider('restore');
+                            $("#login_system").addClass('disabled');
+                            var mes_div_html = '' +
+                              '<div class="alert alert-danger">' +
+                              '<strong>错误!</strong> ' + res.message +
+                              '</div>';
+                            $('.login_show').html(mes_div_html);
+                          } else if (res.login_status === 'SUCCESS') {
+                            $.cookie('user_session', res.user_session, {path: '/'})
+                            $.cookie('user_name', username, {path: '/'})
+                            $.cookie('real_name', res.real_name, {path: '/'})
+                            // 刷新页面
+                            location.reload();
+                          }
+                        },
+                        error: function () {
+                          console.log('error');
+                        }
+                      });
+                    }
+                  });
+                });
+              </script>
+            </div>
+          </div>
+        </div>
+        <script>
+          $(document).ready(function () {
+            $('#user_head_font').click(function () {
+              $('.user_operate_dev').toggle(500);
+              var real_name = $.cookie('real_name');
+              if (real_name === undefined) {
+                var user_info_html =
+                  '<a class="please_login" href="" style="display: grid;cursor: pointer;text-align: center;padding-top: 30px;font-size: 14px;" data-toggle="modal" data-target="#user_login">登录/注册</a>';
+                $('.user_operate_dev').html(user_info_html)
+              } else {
+                var user_info_html = '<ul class="nav flex-column">' +
+                  '<li class="nav-item">' +
+                  '<a class="nav-link disabled" href="#">' + real_name + '</a>' +
+                  '</li>' +
+                  '<li class="nav-item">' +
+                  '<a class="nav-link" href="/user/main">个人信息主页</a>' +
+                  '</li>' +
+                  '<li class="nav-item">' +
+                  '<a class="nav-link" href="#" id="logout">退出登录</a>' +
+                  '</li>' +
+                  '</ul>';
+                $('.user_operate_dev').html(user_info_html)
+                $('#logout').click(function () {
+                  $.ajax({
+                    method: 'post',
+                    async: true,
+                    cache: false,
+                    // 数据类型必须为application/x-www-form-urlencoded之外的类型
+                    contentType: 'application/json;charset=utf-8',
+                    dataType: "json", // 数据返回类型
+                    url: '/api/user/logout',
+                    success: function (res) {
+                      console.log(res);
+                      $.cookie('user_session', '', {
+                        expires: -1
+                      })
+                      $.cookie('user_name', '', {
+                        expires: -1
+                      })
+                      $.cookie('real_name', '', {
+                        expires: -1
+                      })
+                      location.reload();
+                    },
+                    error: function () {
+                      console.log('error');
+                    }
+                  });
+                })
+              }
+            })
+          })
+        </script>
+      </div>
+    </div>
+    <!-- 面包屑导航 -->
+    <script>
+      $(function () {
+        var father_html = '';
+        if (county) {
+          father_html = '<li class="breadcrumb-item">' + county + '</li>';
+        }
+        var nav_div_html = '' +
+          '<ol class="breadcrumb">' +
+          '<li class="breadcrumb-item">凉山</li>' +
+          father_html +
+          '<li class="breadcrumb-item active">' + area_name + '</li>' +
+          '</ol>';
+        $('#nav_right_div').html(nav_div_html);
+      });
+    </script>
+    <div class="body_div">
+      <!-- <div class="now_time_weather">
+        <p>当前日期时间：<span id="now_time_data">0000-00-00 00:00:00</span></p>
+      </div> -->
+      <!-- 当前日期时间 -->
+      <!-- <script>
+        window.setInterval(function(){
+          $('#now_time_data').html(new Date().format("yyyy-MM-dd hh:mm:ss"));
+        },1000*60);
+      </script> -->
+      <div class="hours_weatehr">
+        <div class="hours_weather_top">
+          <p>逐小时预报</p>
+        </div>
+        <div class="float_sign_div float-left">
+          <i class="sign_left float-right" id='sign_left'></i>
+          <script>
+            $('#sign_left').on('click', function () {
+              left_num = parseInt($('#weather_info_ul').css('left').replace('px', ''));
+              if (left_num < 0) {
+                left_num = left_num + 54;
+                $('#weather_info_ul').css('left', left_num + 'px');
+              }
+            })
+          </script>
+        </div>
+        <div class="hours_weather_bottom float-left">
+          <ul id="weather_info_ul">
+          </ul>
+          <script>
+            $(function () {
+              // 逐小时天气信息
+              $.ajax({
+                method: 'get',
+                async: false,
+                cache: false,
+                url: base_url + '/search/get_detail_weather_info',
+                data: 'area=' + area_name + '&county=' + county,
+                success: function (res) {
+                  var ul_li_html = '';
+                  for (var i = 0; i < res.length; i++) {
+                    var date_time = "时间：" + res[i].date_hour.slice(0, 4) + "年" + res[i].date_hour.slice(4,
+                        6) +
+                      "月" + res[i].date_hour.slice(6, 8) + "日 " + res[i].date_hour.slice(8, 10) + "时";
+                    var wind_des = '';
+                    if (res[i].wind_direction === "无风") {
+                      wind_des = "无持续风向";
+                    } else {
+                      wind_des = res[i].wind_direction + "风";
+                    }
+                    var wind_p = '';
+                    if (parseInt(res[i].wind_power) < "3") {
+                      wind_p = '<3级';
+                    } else {
+                      wind_p = res[i].wind_power + "级";
+                    }
+                    ul_li_html += '' +
+                      '<li class="today_weather_hour li_num_' + res[i].date_hour.slice(8, 10) + '">' +
+                      '<div class="time" title="' + date_time + '">' + res[i].date_hour.slice(8, 10) +
+                      '时</div>' +
+                      '<i style="background:url(' + '/images/icons/' + res[i].weather_name +
+                      '.gif) no-repeat center;" title="天气：' + res[i].weather_name.slice(3) + '"></i>' +
+                      '<div class="temperature" title="气温：' + res[i].temperature + '°C">' + res[i]
+                      .temperature + '°C</div>' +
+                      '<div class="wind" title="风向：' + wind_des + '">' + wind_des + '</div>' +
+                      '<div class="wind_power" title="风力：' + wind_p + '">' +
+                      wind_p +
+                      '</div>' +
+                      '</li>'
+                  }
+                  $('#weather_info_ul').html(ul_li_html);
+                  // 选中当前时间所在 li
+                  var now_date = new Date();
+                  var now_date_hour = now_date.getHours();
+                  if (now_date_hour < 10) {
+                    now_date_hour = '0' + now_date_hour;
+                  }
+                  // 移除之前的标记
+                  $('.today_weather_hour').removeClass('li_hours_active');
+                  // 添加新标记
+                  $('.li_num_' + now_date_hour).addClass('li_hours_active');
+                  if (now_date_hour >= 8 && now_date_hour <= 14) {
+                    $('#weather_info_ul').css('left', (-54 * (now_date_hour - 8)) + 'px');
+                  } else {
+                    $('#weather_info_ul').css('left', (-54 * 6) + 'px');
+                  }
+                },
+                error: function () {
+                  console.log('error');
+                }
+              })
+            });
+          </script>
+        </div>
+        <div class="float_sign_div float-left">
+          <i class="sign_right float-left" id='sign_right'></i>
+          <script>
+            $('#sign_right').on('click', function () {
+              right_num = parseInt($('#weather_info_ul').css('left').replace('px', ''));
+              if (right_num > -324) {
+                right_num = right_num - 54;
+                $('#weather_info_ul').css('left', right_num + 'px');
+              }
+            })
+          </script>
+        </div>
+
+      </div>
+      <div class="life_info">
+        <div class="life_info_detail">
+          <div class="life_title">
+            <p>生活助手</p>
+          </div>
+          <div class="life_detail">
+            <!-- <div>
+              <h6 class="detail_head">紫外线</h6>
+              <p class="detail_info">最弱</p>
+              <p class="detail_desc">辐射弱，涂擦SPF8-12防晒护肤品。</p>
+            </div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div> -->
+          </div>
+          <script>
+            $(function () {
+              $.ajax({
+                method: 'get',
+                async: false,
+                cache: false,
+                url: base_url + '/search/get_life_weather_info',
+                data: 'area=' + area_name + '&county=' + county,
+                success: function (res) {
+                  life_dev_html = '';
+                  for (var i = 0; i < res.length; i++) {
+                    life_dev_html += '' +
+                      '<div class="lift_detail_div_' + i + '">' +
+                      '<h6 class="detail_head">' + res[i].a + '</h6>' +
+                      '<p class="detail_info">' + res[i].b + '</p>' +
+                      '<p class="detail_desc">' + res[i].c + '</p>' +
+                      '</div>'
+                  }
+                  $('.life_detail').html(life_dev_html);
+                },
+                error: function () {
+                  console.log('error');
+                }
+              })
+            });
+          </script>
+        </div>
+      </div>
+      <div>
+        <div class="templete_charts">
+          <div class="charts_title float-left">
+            <p>过去24小时整点天气实况</p>
+          </div>
+          <div class="change_table_button_group float-right">
+            <button type="button" class="btn btn-light" id='temperature'>气温</button>
+            <button type="button" class="btn btn-light" id='humidity'>相对湿度</button>
+            <button type="button" class="btn btn-light" id='rain'>降水量</button>
+            <button type="button" class="btn btn-light" id='wind'>风力</button>
+          </div>
+          <!-- <div class="t_charts_line" id="t_charts_line"></div> -->
+          <div class="charts_wind" id="charts_wind"></div>
+          <div class="charts_rain" id="charts_rain"></div>
+          <div class="charts_humidity" id="charts_humidity"></div>
+          <div class="charts_temperature" id="charts_temperature"></div>
+          <script>
+            $('#temperature').on('click', function () {
+              $('.charts_temperature').removeClass('disabled_charts');
+              $('.charts_humidity').addClass('disabled_charts');
+              $('.charts_rain').addClass('disabled_charts');
+              $('.charts_wind').addClass('disabled_charts');
+            });
+            $('#humidity').on('click', function () {
+              $('.charts_humidity').removeClass('disabled_charts');
+              $('.charts_temperature').addClass('disabled_charts');
+              $('.charts_rain').addClass('disabled_charts');
+              $('.charts_wind').addClass('disabled_charts');
+            });
+            $('#rain').on('click', function () {
+              $('.charts_temperature').addClass('disabled_charts');
+              $('.charts_humidity').addClass('disabled_charts');
+              $('.charts_rain').removeClass('disabled_charts');
+              $('.charts_wind').addClass('disabled_charts');
+            });
+            $('#wind').on('click', function () {
+              $('.charts_temperature').addClass('disabled_charts');
+              $('.charts_humidity').addClass('disabled_charts');
+              $('.charts_rain').addClass('disabled_charts');
+              $('.charts_wind').removeClass('disabled_charts');
+            });
+          </script>
+          <!-- 温度变化表 -->
+          <script>
+            $(function () {
+              // 基于准备好的dom，初始化echarts实例
+              var temperatureChart = echarts.init(document.getElementById('charts_temperature'));
+              var humidityChart = echarts.init(document.getElementById('charts_humidity'));
+              var rainChart = echarts.init(document.getElementById('charts_rain'));
+              var windChart = echarts.init(document.getElementById('charts_wind'));
+              $.ajax({
+                method: 'get',
+                async: false,
+                cache: false,
+                url: base_url + '/search/get_weather_table',
+                data: 'area=' + area_name + '&county=' + county,
+                success: function (res) {
+                  // 气温
+                  var max_temperature = -100;
+                  var min_temperature = 100;
+                  for (var i = 0; i < res.temperature.length; i++) {
+                    if (res.temperature[i] != "null") {
+                      self_val = parseInt(res.temperature[i]);
+                      if (self_val > max_temperature) {
+                        max_temperature = self_val;
+                      }
+                      if (self_val < min_temperature) {
+                        min_temperature = self_val;
+                      }
+                      // console.log('min:' + min_temperature +' max:' + max_humidity + ' self:' + self_val);
+                    }
+                  }
+                  var temperatureOption = {
+                    title: {
+                      text: '过去24小时气温变化',
+                      textStyle: {
+                        fontWeight: 'normal',
+                      },
+                      subtext: "最高气温：" + max_temperature + '°C    最低气温：' + min_temperature + '°C',
+                      subtextStyle: {
+                        color: '#666',
+                        fontSize: 14,
+                      }
+                    },
+                    tooltip: {
+                      trigger: 'axis',
+                      formatter: function (data) {
+                        return '详情<br/>时间：' + data[0].name + '时<br/>温度：' + data[0].value + '°C';
+                      }
+                    },
+                    legend: {
+                      data: ['时刻', '气温']
+                    },
+                    xAxis: {
+                      type: 'category',
+                      boundaryGap: false,
+                      axisLabel: {
+                        formatter: '{value} 时'
+                      },
+                      data: res.hour
+                    },
+                    yAxis: {
+                      axisLabel: {
+                        formatter: '{value} °C'
+                      },
+                      type: 'value',
+                    },
+                    series: [{
+                      name: '温度',
+                      markPoint: {
+                        data: [{
+                            type: 'max',
+                            name: '最大值'
+                          },
+                          {
+                            type: 'min',
+                            name: '最小值'
+                          }
+                        ]
+                      },
+                      markLine: {
+                        data: [{
+                          type: 'average',
+                          name: '平均值'
+                        }]
+                      },
+                      data: res.temperature,
+                      type: 'line',
+                      color: '#f29b00',
+                    }]
+                  }
+                  // 使用刚指定的配置项和数据显示图表。
+                  temperatureChart.setOption(temperatureOption);
+                  // 湿度
+                  var max_humidity = -100;
+                  for (var j = 0; j < res.humidity.length; j++) {
+                    if (res.humidity[j] !== "null") {
+                      if (res.humidity[j] > max_humidity) {
+                        max_humidity = res.humidity[j];
+                      }
+                    }
+                  }
+                  var humidityOption = {
+                    title: {
+                      text: '过去24小时相对湿度变化',
+                      textStyle: {
+                        fontWeight: 'normal',
+                      },
+                      subtext: "最大相对湿度：" + max_humidity + '%',
+                      subtextStyle: {
+                        color: '#666',
+                        fontSize: 14,
+                      }
+                    },
+                    tooltip: {
+                      trigger: 'axis',
+                      formatter: function (data) {
+                        return '详情<br/>时间：' + data[0].name + '时<br/>相对湿度：' + data[0].value + '%';
+                      }
+                    },
+                    legend: {
+                      data: ['时刻', '气温']
+                    },
+                    xAxis: {
+                      type: 'category',
+                      boundaryGap: false,
+                      axisLabel: {
+                        formatter: '{value} 时'
+                      },
+                      data: res.hour
+                    },
+                    yAxis: {
+                      axisLabel: {
+                        formatter: '{value} %'
+                      },
+                      type: 'value',
+                    },
+                    series: [{
+                      name: '相对湿度',
+                      markPoint: {
+                        data: [{
+                            type: 'max',
+                            name: '最大值'
+                          },
+                          // {
+                          //   type: 'min',
+                          //   name: '最小值'
+                          // }
+                        ]
+                      },
+                      markLine: {
+                        data: [{
+                          type: 'average',
+                          name: '平均值'
+                        }]
+                      },
+                      data: res.humidity,
+                      type: 'line',
+                      color: '#f0760a',
+                    }]
+                  }
+                  // 使用刚指定的配置项和数据显示图表。
+                  humidityChart.setOption(humidityOption);
+                  // 降水
+                  var count_rain = 0;
+                  for (var k = 0; k < res.rain.legend; k++) {
+                    if (res.rain[k] !== "null") {
+                      count_rain = count_rain + parseInt(res.rain[k]);
+                    }
+                  }
+                  var rainOption = {
+                    title: {
+                      text: '过去24小时降水量变化',
+                      textStyle: {
+                        fontWeight: 'normal',
+                      },
+                      subtext: '总降雨量：' + count_rain + 'mm',
+                      subtextStyle: {
+                        color: '#666',
+                        fontSize: 14,
+                      }
+                    },
+                    tooltip: {
+                      trigger: 'axis',
+                      formatter: function (data) {
+                        return '详情<br/>时间：' + data[0].name + '时<br/>降水量：' + data[0].value + '毫米';
+                      }
+                    },
+                    legend: {
+                      data: ['时刻', '气温']
+                    },
+                    xAxis: {
+                      type: 'category',
+                      boundaryGap: false,
+                      axisLabel: {
+                        formatter: '{value} 时'
+                      },
+                      data: res.hour
+                    },
+                    yAxis: {
+                      axisLabel: {
+                        formatter: '{value} mm'
+                      },
+                      type: 'value',
+                    },
+                    series: [{
+                      name: '降水量',
+                      markPoint: {
+                        // data: [{
+                        //     type: 'max',
+                        //     name: '最大值'
+                        //   },
+                        //   {
+                        //     type: 'min',
+                        //     name: '最小值'
+                        //   }
+                        // ]
+                      },
+                      markLine: {
+                        data: [{
+                          type: 'average',
+                          name: '平均值'
+                        }]
+                      },
+                      data: res.rain,
+                      type: 'line',
+                      color: '#3392f4',
+                    }]
+                  }
+                  // 使用刚指定的配置项和数据显示图表。
+                  rainChart.setOption(rainOption);
+                  // 风力
+                  var max_wind_power = -100;
+                  for (var l = 0; l < res.wind_power.length; l++) {
+                    if (res.wind_power[l] !== "null") {
+                      if (res.wind_power[l] > max_wind_power) {
+                        max_wind_power = res.wind_power[l];
+                      }
+                    }
+                  }
+                  humidityChart.setOption(humidityOption);
+                  var windOption = {
+                    title: {
+                      text: '过去24小时风力变化',
+                      textStyle: {
+                        fontWeight: 'normal',
+                      },
+                      subtext: "最大风力：" + max_wind_power + "级",
+                      subtextStyle: {
+                        color: '#666',
+                        fontSize: 14,
+                      }
+                    },
+                    tooltip: {
+                      trigger: 'axis',
+                      formatter: function (data) {
+                        return '详情<br/>时间：' + data[0].name + '时<br/>风力：' + data[0].value + '级';
+                      }
+                    },
+                    legend: {
+                      data: ['时刻', '气温']
+                    },
+                    xAxis: {
+                      type: 'category',
+                      boundaryGap: false,
+                      axisLabel: {
+                        formatter: '{value} 时'
+                      },
+                      data: res.hour
+                    },
+                    yAxis: {
+                      axisLabel: {
+                        formatter: '{value} 级'
+                      },
+                      type: 'value',
+                    },
+                    series: [{
+                      name: '风力',
+                      markPoint: {
+                        data: [{
+                            type: 'max',
+                            name: '最大值'
+                          },
+                          // {
+                          //   type: 'min',
+                          //   name: '最小值'
+                          // }
+                        ]
+                      },
+                      markLine: {
+                        data: [{
+                          type: 'average',
+                          name: '平均值'
+                        }]
+                      },
+                      data: res.wind_power,
+                      type: 'line',
+                      color: '#ecd132',
+                    }]
+                  }
+                  // 使用刚指定的配置项和数据显示图表。
+                  windChart.setOption(windOption);
+                  // 
+                  $('.charts_temperature').removeClass('disabled_charts');
+                  $('.charts_humidity').addClass('disabled_charts');
+                  $('.charts_rain').addClass('disabled_charts');
+                  $('.charts_wind').addClass('disabled_charts');
+                },
+                error: function () {
+                  console.log('error');
+                }
+              });
+            });
+          </script>
+        </div>
+      </div>
+      <div class="seven_day_weather">
+        <div class="seven_day_weather_body">
+          <div class="seven_weather_title">
+            <p>未来七天天气预报</p>
+          </div>
+          <div class="seven_weather_b" id='seven_weather_b'>
+          </div>
+        </div>
+        <script>
+          $(function () {
+            $.ajax({
+              method: 'get',
+              async: false,
+              cache: false,
+              url: base_url + '/search/get_seven_day_weather',
+              data: 'area=' + area_name + '&county=' + county,
+              success: function (res) {
+                var seven_html = '';
+                for (var i = 0; i < res.length; i++) {
+                  var date_str = res[i].date_hour
+                  var year_str = date_str.slice(0, 4);
+                  var month_str = date_str.slice(4, 6);
+                  var day_str = date_str.slice(6, 8);
+                  var wind_des = '';
+                  if (res[i].wind_direction === "无风") {
+                    wind_des = "无持续风向";
+                  } else {
+                    wind_des = res[i].wind_direction + "风";
+                  }
+                  var wind_p = '';
+                  if (parseInt(res[i].wind_power) < "3") {
+                    wind_p = '<3级';
+                  } else {
+                    wind_p = res[i].wind_power + "级";
+                  }
+                  seven_html += '' +
+                    '<div class="seven_day seven_day_' + i + '">' +
+                    '<div class="seven_date" title="日期：' + year_str + '年' + month_str + '月' + day_str + '日' +
+                    '">' + year_str + '年' + month_str + '月' + day_str + '日</div>' +
+                    '<i class="seven_weather_img" style="background:url(/images/icons/' + res[i]
+                    .weather_name +
+                    '.gif) no-repeat center;" title="天气：' + res[i].weather_name.slice(3) + '"></i>' +
+                    '<div class="seven_wind" title="气温：' + res[i].temperature + '°C">' + res[i].temperature +
+                    '°C</div>' +
+                    '<div class="seven_wind" title="风向：' + wind_des + '">' + wind_des + '</div>' +
+                    '<div class="seven_wind_power" title="风力：' + wind_p + '">' + wind_p + '</div>' +
+                    '</div>'
+                }
+                $('#seven_weather_b').html(seven_html);
+              },
+              error: function () {
+                console.log('error');
+              }
+            })
+          });
+        </script>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

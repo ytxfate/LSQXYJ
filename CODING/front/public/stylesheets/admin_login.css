@@ -1,0 +1,63 @@
+.main_html {
+    height: 100%;
+    background-color: #e9ecef;
+}
+
+.main_body {
+    width: 100%;
+    height: 100%;
+}
+
+.body_head {
+    width: 100%;
+    height: 150px;
+}
+
+.head_title_div {
+    width: 1110px;
+    height: 100px;
+    margin: auto;
+    background: url('/images/admin_login_bg.jpg') no-repeat center;
+}
+
+.mbx {
+    margin-top: 5px;
+    margin-bottom: 2px;
+    width: 100%;
+    height: 40px;
+    background-color: #D3D3D3;
+    border-radius: 7px;
+}
+
+.body_body {
+    width: 100%;
+    height: 500px;
+    background-color: #D3D3D3;
+    border-radius: 10px;
+}
+
+.login_div {
+    margin: auto;
+    width: 400px;
+    height: 100%;
+    /* background-color: aquamarine; */
+}
+
+.login_head {
+    height: 100px;
+    ;
+}
+
+.login_form {
+    width: 100%;
+    height: 250px;
+    /* background-color: aqua; */
+}
+
+.sub_button_div {
+    margin-top: 35px;
+}
+
+.login_message {
+    margin-top: 15px;
+}

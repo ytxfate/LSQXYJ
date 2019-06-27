@@ -1,0 +1,425 @@
+.main_body {
+    /* background-color: #CCC; */
+    height: 100%;
+}
+
+.top_info {
+    background-color: #e9ecef;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.nav_div {
+    margin-top: 2px;
+    margin-bottom: 2px;
+    width: 100%;
+    height: 40px;
+    background-color: #e9ecef;
+    border-radius: 7px;
+}
+
+.nav_left_div {
+    width: 10%;
+    height: 40px;
+    float: left;
+    padding: 4px 20px;
+}
+
+.nav_right_div {
+    float: left;
+    width: 400px;
+}
+
+.body_div {
+    margin: 0;
+    padding: 0;
+    background-color: #e9ecef;
+    /* height: 100%; */
+    width: 100%;
+    border-top-left-radius: 7px;
+    border-top-right-radius: 7px;
+}
+
+.hours_weatehr {
+    width: 100%;
+    height: 250px;
+}
+
+.hours_weather_top {
+    width: 972px;
+    margin: auto;
+    height: 60px;
+}
+
+.hours_weather_top p {
+    font-size: 18px;
+    width: 130px;
+    color: #777;
+    font-weight: bold;
+    /* padding-left: 30px; */
+}
+
+.float_sign_div {
+    width: 69px;
+    height: 180px;
+}
+
+.float_sign_div i {
+    cursor: pointer;
+    display: block;
+    width: 32px;
+    height: 60px;
+    margin-top: 60px;
+    /* background-color: rgba(0, 0, 0, 0.363); */
+}
+
+.float_sign_div i:hover {
+    background-color: #CCC;
+}
+
+.sign_left {
+    border-top-left-radius: 60px;
+    border-bottom-left-radius: 60px;
+    background: url('/images/to_left.png') no-repeat center;
+}
+
+.sign_right {
+    border-top-right-radius: 60px;
+    border-bottom-right-radius: 60px;
+    background: url('/images/to_right.png') no-repeat center;
+}
+
+.hours_weather_bottom {
+    /* margin: auto; */
+    height: 200px;
+    width: 972px;
+    /* background-color: #87CEEB; */
+    overflow: hidden;
+    background: -webkit-linear-gradient(left top, #1E90FF, #FFF);
+    /* Safari 5.1 - 6.0 */
+    background: -o-linear-gradient(bottom right, #1E90FF, #FFF);
+    /* Opera 11.1 - 12.0 */
+    background: -moz-linear-gradient(bottom right, #1E90FF, #FFF);
+    /* Firefox 3.6 - 15 */
+    background: linear-gradient(to bottom right, #1E90FF, #FFF);
+    /* 标准的语法（必须放在最后） */
+}
+
+.hours_weather_bottom ul {
+    height: 200px;
+    width: 1296px;
+    position: relative;
+    left: -54px;
+    list-style: none;
+}
+
+.hours_weather_bottom ul li {
+    width: 54px;
+    height: 200px;
+    float: left;
+    list-style-type: none;
+    text-align: center;
+}
+
+.li_hours_active {
+    background-color: #00BFFF;
+}
+
+.time {
+    margin-top: 10px;
+    font-size: 15px;
+}
+
+.today_weather_hour i {
+    margin-top: 20px;
+    display: block;
+    width: 54px;
+    height: 54px;
+    /* background-color: #AAA; */
+    background: url('/images/icons/白天-晴.gif') no-repeat center;
+}
+
+.temperature {
+    margin-top: 10px;
+    height: 18px;
+    font-size: 13px;
+    overflow: hidden;
+}
+
+.wind {
+    margin-top: 10px;
+    height: 18px;
+    font-size: 13px;
+    overflow: hidden;
+    /* text-overflow: inherit; */
+}
+
+.wind_power {
+    margin-top: 10px;
+    font-size: 15px;
+}
+
+.templete_charts {
+    width: 972px;
+    height: 350px;
+    clear: both;
+    margin: auto;
+    margin-top: 30px;
+    /* overflow: hidden; */
+    /* background-color: aquamarine; */
+}
+
+.charts_title {
+    height: 40px;
+    width: 500px;
+}
+
+.charts_title p {
+    font-size: 18px;
+    /* margin-left: 20px; */
+    margin-top: 5px;
+    font-weight: bold;
+    color: #777;
+}
+
+.t_charts_line {
+    /* margin-top: -150px; */
+    height: 300px;
+    width: 100%;
+    /* background-color: aqua; */
+}
+
+.now_time_weather p,
+.now_time_weather p span {
+    margin-left: 30px;
+    font-size: 18px;
+}
+
+.charts_temperature,
+.charts_humidity,
+.charts_rain,
+.charts_wind {
+    width: 972px;
+    height: 300px;
+    position: absolute;
+    clear: both;
+    margin-top: 50px;
+}
+
+/* .charts_temperature {
+    background-color: blue;
+}
+
+.charts_humidity {
+    background-color: blueviolet;
+}
+
+.charts_rain {
+    background-color: brown;
+}
+
+.charts_wind {
+    background-color: burlywood;
+} */
+.change_table_button_group {
+    margin-top: 5px;
+    margin-right: 30px;
+    height: 40px;
+}
+
+.disabled_charts {
+    display: none;
+}
+
+.life_info {
+    width: 100%;
+    height: 200px;
+    margin-top: 40px;
+    /* background-color: cadetblue; */
+}
+
+.life_info_detail {
+    width: 972px;
+    height: 100%;
+    margin: auto;
+    /* background-color: #E5E5E5; */
+    border-radius: 7px;
+    background: -webkit-radial-gradient(#F8F8FF, #87CEFA);
+    /* Safari 5.1 - 6.0 */
+    background: -o-radial-gradient(#F8F8FF, #87CEFA);
+    /* Opera 11.6 - 12.0 */
+    background: -moz-radial-gradient(#F8F8FF, #87CEFA);
+    /* Firefox 3.6 - 15 */
+    background: radial-gradient(#F8F8FF, #87CEFA);
+    /* 标准的语法（必须放在最后） */
+}
+
+.life_title {
+    height: 40px;
+    width: 100px;
+    margin-left: 10px;
+    margin-top: 10px;
+}
+
+.life_detail {
+    width: 905px;
+    height: 150px;
+    margin: auto;
+}
+
+.life_detail div {
+    padding-top: 20px;
+    width: 150px;
+    height: 150px;
+    float: left;
+}
+
+.lift_detail_div_1,
+.lift_detail_div_2,
+.lift_detail_div_3,
+.lift_detail_div_4,
+.lift_detail_div_5 {
+    border-left: solid 1px #EEE;
+}
+
+.life_title p {
+    font-size: 18px;
+    color: #777;
+    padding-top: 15px;
+    font-weight: bold;
+}
+
+.detail_head,
+.detail_info,
+.detail_desc {
+    width: 150px;
+    margin: 0;
+    padding: 5px 10px;
+    text-align: center;
+    line-height: 20px;
+}
+
+.detail_head {
+    font-weight: bolder;
+}
+
+.detail_info {
+    font-size: 16px;
+}
+
+.seven_day_weather {
+    width: 100%;
+    height: 350px;
+    /* background-color: aquamarine; */
+    padding-bottom: 50px;
+}
+
+.seven_day_weather_body {
+    width: 972px;
+    height: 100%;
+    margin: auto;
+    /* background-color: #E5E5E5; */
+    border-radius: 7px;
+    background: -webkit-radial-gradient(#F8F8FF, #00BFFF);
+    /* Safari 5.1 - 6.0 */
+    background: -o-radial-gradient(#F8F8FF, #00BFFF);
+    /* Opera 11.6 - 12.0 */
+    background: -moz-radial-gradient(#F8F8FF, #00BFFF);
+    /* Firefox 3.6 - 15 */
+    background: radial-gradient(#F8F8FF, #00BFFF);
+    /* 标准的语法（必须放在最后） */
+}
+
+.seven_weather_title {
+    width: 200px;
+    height: 40px;
+}
+
+.seven_weather_title p {
+    font-size: 18px;
+    color: #777;
+    font-weight: bold;
+    padding-top: 15px;
+    padding-left: 10px;
+}
+
+.seven_weather_b {
+    width: 945px;
+    margin: auto;
+    height: 100%;
+}
+
+.seven_day {
+    width: 135px;
+    height: 230px;
+    float: left;
+}
+
+.seven_day_1,
+.seven_day_2,
+.seven_day_3,
+.seven_day_4,
+.seven_day_5,
+.seven_day_6 {
+    border-left: solid 1px #EEE;
+}
+
+.seven_date {
+    text-align: center;
+    font-size: 14px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.seven_weather_img {
+    display: block;
+    width: 54px;
+    height: 54px;
+    margin: auto;
+    background: #CCC;
+}
+
+.seven_wind {
+    text-align: center;
+    font-size: 14px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.seven_wind_power {
+    text-align: center;
+    font-size: 14px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.user_dev {
+    width: 40px;
+    height: 40px;
+    float: right;
+    /* background-color: #CCC; */
+}
+
+.user_head_font {
+    color: #9C9C9C;
+    cursor: pointer;
+    text-align: center;
+}
+
+.user_head_font:hover {
+    color: #4F4F4F;
+}
+
+.user_operate_dev {
+    width: 130px;
+    height: 110px;
+    background-color: #f8f8f8;
+    position: absolute;
+    margin-left: -20px;
+    margin-top: 10px;
+    border-radius: 10px;
+    display: none;
+}
+.user_operate_dev ul li {
+    text-align: center;
+}

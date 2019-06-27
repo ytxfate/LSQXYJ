@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel="Shortcut Icon" href="/images/favicon.ico">
+  <meta charset="UTF-8">
+  <title>凉山气象预报预警系统-找回密码</title>
+  <!-- CSS -->
+  <link rel='stylesheet' href='/stylesheets/style.css' />
+  <link rel="stylesheet" href="/stylesheets/user_forget_pwd.css">
+  <!-- JS -->
+  <!-- jQuery -->
+  <script type="text/javascript" src="/javascripts/jquery-3.3.1.slim.min.js"></script>
+  <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
+  <script type="text/javascript" src="/javascripts/jquery.cookie.min.js"></script>
+  <!-- 滑动验证 -->
+  <link rel="stylesheet" href="/stylesheets/jquery.slider.css">
+  <!-- bootstrap -->
+  <link rel="stylesheet" href="/stylesheets/bootstrap.min.css">
+  <script type="text/javascript" src="/javascripts/bootstrap.min.js"></script>
+  <script type="text/javascript" src="/javascripts/popper.min.js"></script>
+  <!-- jQuery UI -->
+  <link rel="stylesheet" href="/stylesheets/jquery-ui.css">
+  <script type="text/javascript" src="/javascripts/jquery-ui.min.js"></script>
+  <!-- 百度 map API -->
+  <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=PnQZjYEi40I2OB03o2BMGeChzYWCIyUe">
+  </script>
+  <script type="text/javascript" src="http://api.map.baidu.com/library/AreaRestriction/1.2/src/AreaRestriction_min.js">
+  </script>
+  <!-- 图标 -->
+  <link rel="stylesheet" href="/stylesheets/font-awesome.min.css">
+</head>
+
+<body>
+  <div class="container main_body">
+    <div class="top_info">
+      <h3>凉山气象预报预警系统 -- 找回密码</h3>
+      <p>为你提供凉山地区详细的天气预报及预警信息。</p>
+    </div>
+    <div class="forget_main">
+      <!-- Nav tabs -->
+      <ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item">
+          <a class="nav-link" href="/">返回首页</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" data-toggle="tab" href="#forget_pwd">找回密码</a>
+        </li>
+      </ul>
+
+      <!-- Tab panes -->
+      <div class="tab-content">
+        <div id="forget_pwd" class="container tab-pane active"><br>
+          <h3>找回密码</h3>
+          <div class="forget_dev">
+            <div class="forget_info">
+              <div class="form-group">
+                <label for="username">登录名：</label>
+                <input type="email" class="form-control" id="username" placeholder="用户邮箱" maxlength="20">
+              </div>
+              <div class="username_input_show">
+
+              </div>
+              <!-- 密保验证或邮箱验证 -->
+              <div class="mibao_or_email">
+                <ul class="nav nav-tabs nav-fill" id="myTab" role="tablist">
+                  <li class="nav-item">
+                    <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab"
+                      aria-controls="home" aria-selected="true">密保验证</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab"
+                      aria-controls="profile" aria-selected="false">邮箱验证</a>
+                  </li>
+                </ul>
+                <div class="tab-content" id="myTabContent">
+                  <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                    <br>
+                    <div class="form-group">
+                      <div id="mibao_slider" class="slider"></div>
+                    </div>
+                    <!-- 滑动验证 -->
+                    <script type="text/javascript" src="/javascripts/jquery.slider.min.js"></script>
+                    <script>
+                      $("#mibao_slider").slider({
+                        callback: function (result) {
+                          if (result === true) {
+                            $("#mibao_btn").removeClass('disabled');
+                          }
+                        }
+                      });
+                    </script>
+                    <div>
+                      <br>
+                      <button class="btn btn-primary btn-block disabled" id="mibao_btn">获取用户密保</button>
+                      <br>
+                      <script>
+                        $(document).ready(function () {
+                          $('#mibao_btn').click(function () {
+                            if ($('#mibao_btn').hasClass('disabled')) {
+                              return;
+                            } else {
+                              var username = $('#username').val().replace(' ', '') || '';
+                              if (username === '') {
+                                $('.username_input_show').html('<div class="alert alert-warning">' +
+                                  '<strong>警告!</strong> 登录名不能为空！' +
+                                  '</div>')
+                              } else {
+                                $.ajax({
+                                  method: 'post',
+                                  async: true,
+                                  cache: false,
+                                  // 数据类型必须为application/x-www-form-urlencoded之外的类型
+                                  contentType: 'application/json;charset=utf-8',
+                                  dataType: "json", // 数据返回类型
+                                  url: '/api/usr_oth/get_usr_mibao',
+                                  data: JSON.stringify({
+                                    "username": username
+                                  }),
+                                  success: function (res) {
+                                    if (res.get_mibao_status === 'ERROR') {
+                                      alert(res.message);
+                                    } else {
+                                      $('#question').val(res.data.question);
+                                    }
+                                  },
+                                  error: function () {
+                                    console.log('error');
+                                  }
+                                });
+                              }
+                              $("#mibao_slider").slider('restore');
+                              $("#mibao_btn").addClass('disabled');
+                            }
+                          })
+                        })
+                      </script>
+                    </div>
+                    <div class="form-group" style="border: 1px solid #CCC;padding: 10px;border-radius: 5px;">
+                      <label>用户密保</label><br>
+                      <label for="question">问题：</label>
+                      <input type="text" class="form-control" disabled id="question" maxlength="50">
+                      <label for="answer">答案：</label>
+                      <input type="text" class="form-control" id="answer" maxlength="50">
+                    </div>
+                    <div class="mibao_check_show">
+
+                    </div>
+                    <!-- 密保验证 -->
+                    <div class="user_mibao">
+                      <div class="form-group">
+                        <div id="mibao_check_slider" class="slider"></div>
+                      </div>
+                      <!-- 滑动验证 -->
+                      <script type="text/javascript" src="/javascripts/jquery.slider.min.js"></script>
+                      <script>
+                        $("#mibao_check_slider").slider({
+                          callback: function (result) {
+                            if (result === true) {
+                              $("#mibao_check_btn").removeClass('disabled');
+                            }
+                          }
+                        });
+                      </script>
+                      <div>
+                        <br>
+                        <button class="btn btn-primary btn-block disabled" id="mibao_check_btn">验证用户密保</button>
+                        <br>
+                      </div>
+                      <script>
+                        $(document).ready(function () {
+                          $('#mibao_check_btn').click(function () {
+                            if ($('#mibao_check_btn').hasClass('disabled')) {
+                              return;
+                            } else {
+                              var username = $('#username').val().replace(' ', '') || '';
+                              var question = $('#question').val().replace(' ', '') || '';
+                              var answer = $('#answer').val().replace(' ', '') || '';
+                              if (username === '') {
+                                $('.mibao_check_show').html('<div class="alert alert-warning">' +
+                                  '<strong>警告!</strong> 登录名不能为空！' +
+                                  '</div>')
+                              } else if (question === '') {
+                                $('.mibao_check_show').html('<div class="alert alert-warning">' +
+                                  '<strong>警告!</strong> 未获取密保问题！' +
+                                  '</div>')
+                              } else if (answer === '') {
+                                $('.mibao_check_show').html('<div class="alert alert-warning">' +
+                                  '<strong>警告!</strong> 密保答案不能为空！' +
+                                  '</div>')
+                              } else {
+                                var form_json = {
+                                  'username': username,
+                                  'question': question,
+                                  'answer': answer
+                                };
+                                $.ajax({
+                                  method: 'post',
+                                  async: true,
+                                  cache: false,
+                                  // 数据类型必须为application/x-www-form-urlencoded之外的类型
+                                  contentType: 'application/json;charset=utf-8',
+                                  dataType: "json", // 数据返回类型
+                                  url: '/api/usr_oth/check_usr_mibao',
+                                  data: JSON.stringify(form_json),
+                                  success: function (res) {
+                                    alert(res.message);
+                                    if (res.get_mibao_status === 'SUCCESS') {
+                                      window.open('/', '_top')
+                                    }
+                                  },
+                                  error: function () {
+                                    console.log('error');
+                                  }
+                                });
+                              }
+                              $("#mibao_check_slider").slider('restore');
+                              $("#mibao_check_btn").addClass('disabled');
+                            }
+                          })
+                        })
+                      </script>
+                    </div>
+                  </div>
+                  <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                    <br>
+                    <div class="form-group">
+                      <div id="email_slider" class="slider"></div>
+                    </div>
+                    <!-- 滑动验证 -->
+                    <script type="text/javascript" src="/javascripts/jquery.slider.min.js"></script>
+                    <script>
+                      $("#email_slider").slider({
+                        callback: function (result) {
+                          if (result === true) {
+                            $("#email_btn").removeClass('disabled');
+                          }
+                        }
+                      });
+                    </script>
+                    <div>
+                      <br>
+                      <button class="btn btn-primary btn-block disabled" id="email_btn">获取邮箱验证码</button>
+                      <br>
+                      <script>
+                        $(document).ready(function () {
+                          $('#email_btn').click(function () {
+                            if ($('#email_btn').hasClass('disabled')) {
+                              return;
+                            } else {
+                              var username = $('#username').val().replace(' ', '') || '';
+                              if (username === '') {
+                                $('.username_input_show').html('<div class="alert alert-warning">' +
+                                  '<strong>警告!</strong> 登录名不能为空！' +
+                                  '</div>')
+                              } else {
+                                $.ajax({
+                                  method: 'post',
+                                  async: true,
+                                  cache: false,
+                                  // 数据类型必须为application/x-www-form-urlencoded之外的类型
+                                  contentType: 'application/json;charset=utf-8',
+                                  dataType: "json", // 数据返回类型
+                                  url: '/api/usr_oth/get_email_code',
+                                  data: JSON.stringify({
+                                    "username": username
+                                  }),
+                                  success: function (res) {
+                                    alert(res.message);
+                                  },
+                                  error: function () {
+                                    console.log('error');
+                                  }
+                                });
+                              }
+                              $("#email_slider").slider('restore');
+                              $("#email_btn").addClass('disabled');
+                            }
+                          })
+                        })
+                      </script>
+                    </div>
+                    <div class="form-group" style="border: 1px solid #CCC;padding: 10px;border-radius: 5px;">
+                      <label for="email_code">邮箱验证码：</label>
+                      <input type="text" class="form-control" id="email_code" maxlength="50">
+                    </div>
+                    <div class="email_check_show"></div>
+                    <div class="form-group">
+                      <div id="email_check_slider" class="slider"></div>
+                    </div>
+                    <!-- 滑动验证 -->
+                    <script>
+                      $("#email_check_slider").slider({
+                        callback: function (result) {
+                          if (result === true) {
+                            $("#email_check_btn").removeClass('disabled');
+                          }
+                        }
+                      });
+                    </script>
+                    <div>
+                      <br>
+                      <button class="btn btn-primary btn-block disabled" id="email_check_btn">验证邮箱验证码</button>
+                      <br>
+                    </div>
+                    <script>
+                      $(document).ready(function () {
+                        $('#email_check_btn').click(function () {
+                          if ($('#email_check_btn').hasClass('disabled')) {
+                            return;
+                          } else {
+                            var username = $('#username').val().replace(' ', '') || '';
+                            var email_code = $('#email_code').val().replace(' ', '') || '';
+                            if (username === '') {
+                              $('.email_check_show').html('<div class="alert alert-warning">' +
+                                '<strong>警告!</strong> 登录名不能为空！' +
+                                '</div>')
+                            } else if (email_code === '') {
+                              $('.email_check_show').html('<div class="alert alert-warning">' +
+                                '<strong>警告!</strong> 邮箱验证码不能为空！' +
+                                '</div>')
+                            } else {
+                              var form_json = {
+                                'username': username,
+                                'email_code': email_code
+                              }
+                              $.ajax({
+                                  method: 'post',
+                                  async: true,
+                                  cache: false,
+                                  // 数据类型必须为application/x-www-form-urlencoded之外的类型
+                                  contentType: 'application/json;charset=utf-8',
+                                  dataType: "json", // 数据返回类型
+                                  url: '/api/usr_oth/check_email_code',
+                                  data: JSON.stringify(form_json),
+                                  success: function (res) {
+                                    alert(res.message);
+                                    if (res.check_code_status === 'SUCCESS') {
+                                      window.open('/', '_top');
+                                    }
+                                  },
+                                  error: function () {
+                                    console.log('error');
+                                  }
+                                });
+                            }
+                          }
+                        })
+                      })
+                    </script>
+                  </div>
+                </div>
+              </div>
+
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

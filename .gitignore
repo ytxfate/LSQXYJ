@@ -1,0 +1,12 @@
+##############################
+## Folders                  ##
+##############################
+# node.js express框架的node_modules
+CODING/front/node_modules/*
+CODING/front_old/node_modules/*
+CODING/front_GaoDeMap/node_modules/*
+CODING/front_echarts/node_modules/*
+
+# python 项目下的编译文件
+CODING/back/__pycache__/*
+*.pyc

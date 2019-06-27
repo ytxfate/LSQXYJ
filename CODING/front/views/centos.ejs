@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <link rel="Shortcut Icon" href="/images/favicon.ico">
+  <meta charset="UTF-8">
+  <title>服务器详情页面</title>
+  <link rel="stylesheet" href="/stylesheets/centos.css">
+  <!-- jQuery -->
+  <script type="text/javascript" src="/javascripts/jquery-3.3.1.slim.min.js"></script>
+  <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
+  <!-- bootstrap -->
+  <link rel="stylesheet" href="/stylesheets/bootstrap.min.css">
+  <script type="text/javascript" src="/javascripts/bootstrap.min.js"></script>
+  <script type="text/javascript" src="/javascripts/popper.min.js"></script>
+  <!-- jQuery UI -->
+  <link rel="stylesheet" href="/stylesheets/jquery-ui.css">
+  <script type="text/javascript" src="/javascripts/jquery-ui.min.js"></script>
+  <!-- echarts -->
+  <script src="/javascripts/echarts.min.js"></script>
+  <script src="/javascripts/echarts-gl.min.js"></script>
+</head>
+
+<body>
+  <div class="container">
+    <div class="dash_board">
+      <div id="cpu_info" class="cpu_info"></div>
+      <div id="memery_info" class="memery_info"></div>
+    </div>
+    <!-- memery 仪表盘 -->
+    <script>
+      var memery_chart = echarts.init(document.getElementById('memery_info'));
+      memery_option = {
+        title: {
+          x: "center",
+          bottom: 20,
+          text: '内存使用率',
+          textStyle: {
+            fontWeight: 'normal',
+            fontSize: 18,
+            color: "#323232"
+          },
+        },
+        tooltip: {
+          show: true,
+        },
+        backgroundColor: "#ffffff",
+        // color: ["#37A2DA", "#32C5E9", "#67E0E3"],
+        series: [{
+          name: '内存使用率',
+          type: 'gauge',
+          detail: {
+            formatter: '{value}%',
+            textStyle: {
+              fontWeight: 'normal',
+              fontSize: 18,
+              // color: "#323232"
+            },
+          },
+          axisLine: {
+            show: true,
+            lineStyle: {
+              width: 30,
+              shadowBlur: 0,
+              color: [
+                [0.3, '#54FF9F'],
+                [0.7, '#FFD700'],
+                [1, '#fd666d']
+              ]
+            }
+          },
+          data: [{
+            value: 0,
+            // name: '内存使用率',
+          }]
+
+        }]
+      };
+      memery_chart.setOption(memery_option, true);
+      setInterval(function () {
+        $.ajax({
+          method: 'get',
+          async: false,
+          cache: false,
+          url: 'http://47.107.140.231:5550/centos/get_memery_info',
+          // data: 'area=' + area_name + '&county=' + county,
+          success: function (res) {
+            var MemTotal = res.MemTotal;
+            var MemUsed = res.MemUsed;
+            var num = ((MemUsed / MemTotal)* 100).toFixed(2);
+            console.log('memery使用率: ' + num + '%');
+            memery_option.series[0].data[0].value = num;
+            memery_chart.setOption(memery_option, true);
+          },
+          error: function () {
+            console.log('error');
+          }
+        })
+      }, 2000);
+    </script>
+    <!-- CPU 仪表盘 -->
+    <script>
+      var cpu_chart = echarts.init(document.getElementById('cpu_info'));
+      cpu_option = {
+        title: {
+          x: "center",
+          bottom: 20,
+          text: 'CPU使用率',
+          textStyle: {
+            fontWeight: 'normal',
+            fontSize: 18,
+            color: "#323232"
+          },
+        },
+        tooltip: {
+          show: true,
+        },
+        backgroundColor: "#ffffff",
+        // color: ["#37A2DA", "#32C5E9", "#67E0E3"],
+        series: [{
+          name: 'CPU使用率',
+          type: 'gauge',
+          detail: {
+            formatter: '{value}%',
+            textStyle: {
+              fontWeight: 'normal',
+              fontSize: 18,
+              // color: "#323232"
+            },
+          },
+          axisLine: {
+            show: true,
+            lineStyle: {
+              width: 30,
+              shadowBlur: 0,
+              color: [
+                [0.3, '#54FF9F'],
+                [0.7, '#FFD700'],
+                [1, '#fd666d']
+              ]
+            }
+          },
+          data: [{
+            value: 0,
+            // name: 'CPU使用率',
+          }]
+        }]
+      };
+      cpu_chart.setOption(cpu_option, true);
+      setInterval(function () {
+        $.ajax({
+          method: 'get',
+          async: false,
+          cache: false,
+          url: 'http://47.107.140.231:5550/centos/get_cpu_info',
+          // data: 'area=' + area_name + '&county=' + county,
+          success: function (res) {
+            console.log('cpu使用率: ' + (res.cpu_use*100).toFixed(2) + '%');
+            cpu_option.series[0].data[0].value = (res.cpu_use*100).toFixed(2);
+            cpu_chart.setOption(cpu_option, true);
+          },
+          error: function () {
+            console.log('error');
+          }
+        })
+        
+      }, 2000);
+    </script>
+  </div>
+</body>
+
+</html>

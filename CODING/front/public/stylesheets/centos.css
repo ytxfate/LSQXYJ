@@ -1,0 +1,10 @@
+.dash_board{
+    width: 600px;
+    height: 300px;
+}
+.memery_info,
+.cpu_info {
+    float: left;
+    width: 300px;
+    height: 300px;
+}

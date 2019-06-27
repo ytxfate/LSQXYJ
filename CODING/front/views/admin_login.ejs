@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <link rel="Shortcut Icon" href="/images/favicon.ico">
+  <meta charset="UTF-8">
+  <title>管理员登录界面</title>
+  <link rel="stylesheet" href="/stylesheets/style.css">
+  <link rel="stylesheet" href="/stylesheets/admin_login.css">
+  <!-- jQuery -->
+  <script type="text/javascript" src="/javascripts/jquery-3.3.1.slim.min.js"></script>
+  <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
+  <script type="text/javascript" src="/javascripts/jquery.cookie.min.js"></script>
+  <!-- 滑动验证 -->
+  <link rel="stylesheet" href="/stylesheets/jquery.slider.css">
+  <!-- bootstrap -->
+  <link rel="stylesheet" href="/stylesheets/bootstrap.min.css">
+  <script type="text/javascript" src="/javascripts/bootstrap.min.js"></script>
+  <script type="text/javascript" src="/javascripts/popper.min.js"></script>
+  <!-- jQuery UI -->
+  <link rel="stylesheet" href="/stylesheets/jquery-ui.css">
+  <script type="text/javascript" src="/javascripts/jquery-ui.min.js"></script>
+
+</head>
+
+<body>
+  <div class="container main_html">
+    <div class="main_body">
+      <div class="body_head">
+        <div class="head_title_div"></div>
+        <div class="mbx">
+          <nav class="breadcrumb">
+            <span class="breadcrumb-item">凉山气象预报预警系统</span>
+            <span class="breadcrumb-item">后台</span>
+            <span class="breadcrumb-item active">登录界面</span>
+          </nav>
+        </div>
+      </div>
+      <div class="body_body">
+        <div class="login_div">
+          <div class="login_head"></div>
+          <div class="login_form">
+            <form>
+              <div class="form-group">
+                <label for="username">用户名:</label>
+                <input type="username" class="form-control" id="username" placeholder="用户名" maxlength="20">
+              </div>
+              <div class="form-group">
+                <label for="password">密码:</label>
+                <input type="password" class="form-control" id="password" placeholder="密码" maxlength="20">
+              </div>
+              <div class="form-group">
+                <div id="admin_slider" class="slider"></div>
+              </div>
+              <!-- 滑动验证 -->
+              <script type="text/javascript" src="/javascripts/jquery.slider.min.js"></script>
+              <script>
+                $("#admin_slider").slider({
+                  callback: function (result) {
+                    if (result === true) {
+                      $("#login_button").removeClass('disabled');
+                    }
+                  }
+                });
+              </script>
+            </form>
+            <div class="sub_button_div">
+              <button class="btn btn-primary btn-block disabled" id="login_button">登录</button>
+            </div>
+            <div id='login_message' class="login_message">
+            </div>
+            <!-- <div class="alert alert-success">
+                <strong>成功!</strong> 指定操作成功提示信息。
+            </div>
+            <div class="alert alert-warning" id="alert_warning">
+              <strong>警告!</strong> 设置警告信息。
+            </div>
+            <div class="alert alert-danger">
+              <strong>错误!</strong> 失败的操作
+            </div> -->
+            <!-- <p id="login_message" class="login_message"></p> -->
+            <script>
+              $('#login_button').on('click', function () {
+                if ($('#login_button').hasClass('disabled')) {
+                  return;
+                } else {
+                  var username = $('#username').val().replace(' ', '');
+                  var password = $('#password').val().replace(' ', '');
+                  if (username === '' || password === '') {
+                    var mes_div_html = '' +
+                      '<div class="alert alert-warning">' +
+                      '<strong>警告!</strong> 用户名或密码为空！' +
+                      '</div>';
+                    $('#login_message').html(mes_div_html);
+                    $('#login_button').addClass('disabled');
+                    $("#admin_slider").slider('restore');
+                    setTimeout(function () {
+                      $('#login_message').empty();
+                    }, 2000);
+                  } else {
+                    $.ajax({
+                      method: 'post',
+                      async: false,
+                      cache: false,
+                      xhrFields: {
+                        withCredentials: true
+                      },
+                      crossDomain: true,
+                      dataType: "json",
+                      url: '/api/admin/login',
+                      data: {
+                        "username": username,
+                        "password": password
+                      },
+                      success: function (res) {
+                        console.log(res);
+                        if (res.login_stat === "SUCCESS") {
+                          var mes_div_html = '' +
+                            '<div class="alert alert-success">' +
+                            '<strong>登录成功!</strong>' +
+                            '</div>';
+                          $('#login_message').html(mes_div_html);
+                          // 设置 cookie
+                          $.cookie('session_id', res.session_id);
+                          setTimeout(function () {
+                            window.open('/admin/admin_main', target = '_self');
+                          }, 500);
+                        } else {
+                          var mes_div_html = '' +
+                            '<div class="alert alert-danger">' +
+                            '<strong>错误!</strong> 用户名或密码验证错误！' +
+                            '</div>';
+                          $('#login_message').html(mes_div_html);
+                          $('#login_button').addClass('disabled');
+                          $("#admin_slider").slider('restore');
+                          setTimeout(function () {
+                            $('#login_message').empty();
+                          }, 2000);
+                        }
+                      },
+                      error: function () {
+                        console.log('error');
+                      }
+                    })
+                  }
+                }
+              })
+            </script>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

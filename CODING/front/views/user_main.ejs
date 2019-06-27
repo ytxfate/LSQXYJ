@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel="Shortcut Icon" href="/images/favicon.ico">
+  <meta charset="UTF-8">
+  <title>凉山气象预报预警系统-用户主页</title>
+  <!-- CSS -->
+  <link rel='stylesheet' href='/stylesheets/style.css' />
+  <link rel="stylesheet" href="/stylesheets/user_main.css">
+  <!-- JS -->
+  <!-- jQuery -->
+  <script type="text/javascript" src="/javascripts/jquery-3.3.1.slim.min.js"></script>
+  <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
+  <script type="text/javascript" src="/javascripts/jquery.cookie.min.js"></script>
+  <!-- 滑动验证 -->
+  <link rel="stylesheet" href="/stylesheets/jquery.slider.css">
+  <!-- bootstrap -->
+  <link rel="stylesheet" href="/stylesheets/bootstrap.min.css">
+  <script type="text/javascript" src="/javascripts/bootstrap.min.js"></script>
+  <script type="text/javascript" src="/javascripts/popper.min.js"></script>
+  <!-- jQuery UI -->
+  <link rel="stylesheet" href="/stylesheets/jquery-ui.css">
+  <script type="text/javascript" src="/javascripts/jquery-ui.min.js"></script>
+  <!-- 百度 map API -->
+  <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=PnQZjYEi40I2OB03o2BMGeChzYWCIyUe">
+  </script>
+  <script type="text/javascript" src="http://api.map.baidu.com/library/AreaRestriction/1.2/src/AreaRestriction_min.js">
+  </script>
+  <!-- 图标 -->
+  <link rel="stylesheet" href="/stylesheets/font-awesome.min.css">
+  <script>
+    $(document).ready(function () {
+      var user_session = $.cookie('user_session') || '';
+      var user_name = $.cookie('user_name') || '';
+      var real_name = $.cookie('real_name') || '';
+      if (user_session === '' || user_name === '') {
+        window.open('/', '_top');
+      }
+      // 跳转
+      var page_where = $.cookie('page_where');
+      if (page_where == 'subscribe') {
+        $('#tab_sub_weather').addClass('active');
+        $('#weather_email').addClass('active');
+      } else if (page_where == 'change_pwd') {
+        $('#tab_chnage_pwd').addClass('active');
+        $('#change_pwd').addClass('active');
+      } else {
+        $('#tab_person_info').addClass('active');
+        $('#user_info').addClass('active');
+      }
+    })
+  </script>
+</head>
+
+<body>
+  <div class="container main_body">
+    <div class="top_info">
+      <h3>凉山气象预报预警系统 -- 用户主页</h3>
+      <p>为你提供凉山地区详细的天气预报及预警信息。</p>
+    </div>
+    <div class="body_main">
+      <!-- Nav tabs -->
+      <ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item">
+          <a class="nav-link" href="/">返回首页</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-toggle="tab" href="#user_info" id='tab_person_info'>个人信息页</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-toggle="tab" href="#weather_email" id='tab_sub_weather'>订阅气象提示</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-toggle="tab" href="#change_pwd" id='tab_chnage_pwd'>修改密码</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-toggle="tab" href="#" id='user_logout'>退出登录</a>
+        </li>
+      </ul>
+      <script>
+        $(document).ready(function () {
+          $('#tab_person_info').click(function () {
+            $.cookie('page_where', 'user_info');
+          })
+          $('#tab_sub_weather').click(function () {
+            $.cookie('page_where', 'subscribe');
+          })
+          $('#tab_chnage_pwd').click(function () {
+            $.cookie('page_where', 'change_pwd');
+          })
+          $('#user_logout').click(function () {
+            $.ajax({
+              method: 'post',
+              async: true,
+              cache: false,
+              // 数据类型必须为application/x-www-form-urlencoded之外的类型
+              contentType: 'application/json;charset=utf-8',
+              dataType: "json", // 数据返回类型
+              url: '/api/user/logout',
+              success: function (res) {
+                console.log(res);
+                $.cookie('user_session', '', {
+                  expires: -1,
+                  path: '/'
+                })
+                $.cookie('user_name', '', {
+                  expires: -1,
+                  path: '/'
+                })
+                $.cookie('real_name', '', {
+                  expires: -1,
+                  path: '/'
+                })
+                window.open('/', '_top');
+              },
+              error: function () {
+                console.log('error');
+              }
+            });
+          })
+        })
+      </script>
+
+      <!-- Tab panes -->
+      <div class="tab-content">
+        <div id="user_info" class="container tab-pane"><br>
+          <h3>个人信息页</h3>
+          <div class="personal_info">
+            <div class="user_infor">
+              <div class="form-group">
+                <label for="username">登录名：</label>
+                <input type="email" class="form-control" id="username" disabled maxlength="20">
+              </div>
+              <div class="form-group">
+                <label for="real_name">用户名：</label>
+                <input type="text" class="form-control" id="real_name" placeholder="用户名" maxlength="20">
+              </div>
+              <div class="form-group">
+                <label for="birthday">出生年月：</label>
+                <input type="date" class="form-control" id="birthday">
+              </div>
+              <div class="form-group">
+                <label for="sex">性别：</label>
+                <label class="radio-inline sex_redio"><input type="radio" name="sex" value="男">男</label>
+                <label class="radio-inline sex_redio"><input type="radio" name="sex" value="女">女</label>
+              </div>
+              <div class="form-group">
+                <label for="birthday">地址：</label><br>
+                <select class="form-control addr" id="addr_provence" disabled style="width: 150px;">
+                  <option selected value="四川省">四川省</option>
+                </select>
+                <select class="form-control addr" id="addr_zhou" disabled style="width: 150px;">
+                  <option selected value="凉山彝族自治州">凉山彝族自治州</option>
+                </select>
+                <div style="clear: both;"></div>
+                <select class="form-control addr addr_o" id="addr_county" style="width: 150px;">
+                  <option value="">请选择</option>
+                </select>
+                <select class="form-control addr addr_o" id="addr_township" style="width: 150px;">
+                  <option value="">请选择</option>
+                </select>
+              </div>
+              <script>
+                $(document).ready(function () {
+                  // 县
+                  $.ajax({
+                    method: 'get',
+                    async: false,
+                    cache: false,
+                    xhrFields: {
+                      withCredentials: true
+                    },
+                    crossDomain: true,
+                    dataType: "json",
+                    url: '/api/other/get_county',
+                    success: function (res) {
+                      var data = res.data;
+                      var select_county_html = '<option value="">请选择</option>';
+                      for (var i = 0; i < data.length; i++) {
+                        select_county_html += '<option value="' + data[i] + '">' + data[i] + '</option>';
+                      }
+                      $('#addr_county').html(select_county_html);
+                    },
+                    error: function () {
+                      console.log('error');
+                    }
+                  });
+                  // 乡
+                  $('#addr_county').change(function () {
+                    var county = $('#addr_county').val();
+                    $.ajax({
+                      method: 'get',
+                      async: false,
+                      cache: false,
+                      xhrFields: {
+                        withCredentials: true
+                      },
+                      crossDomain: true,
+                      dataType: "json",
+                      url: '/api/other/get_township?county=' + county,
+                      success: function (res) {
+                        var data = res.data;
+                        var select_township_html = '<option value="">请选择</option>';
+                        for (var i = 0; i < data.length; i++) {
+                          select_township_html += '<option value="' + data[i] + '">' + data[i] +
+                            '</option>';
+                        }
+                        $('#addr_township').html(select_township_html);
+                      },
+                      error: function () {
+                        console.log('error');
+                      }
+                    });
+                  })
+                })
+              </script>
+              <div style="clear: both;"></div>
+              <div class="form-group" style="border: 1px solid #CCC;padding: 10px;border-radius: 5px;">
+                <label>密保设置(用于找回密码)</label><br>
+                <label for="question">问题：</label>
+                <input type="text" class="form-control" id="question" maxlength="50">
+                <label for="answer">答案：</label>
+                <input type="text" class="form-control" id="answer" maxlength="50">
+              </div>
+              <div>
+                <br>
+                <button class="btn btn-primary btn-block disabled" data-toggle="modal"
+                  data-target="#change_info">修改个人信息</button>
+              </div>
+              <br>
+              <div class="info_show"></div>
+            </div>
+            <script>
+              $(document).ready(function () {
+                // 获取个人信息
+                $.ajax({
+                  method: 'post',
+                  async: true,
+                  cache: false,
+                  // 数据类型必须为application/x-www-form-urlencoded之外的类型
+                  contentType: 'application/json;charset=utf-8',
+                  dataType: "json", // 数据返回类型
+                  url: '/api/user/get_user_info',
+                  success: function (res) {
+                    if (res && res.user_login_stat === 'ERROR') {
+                      window.open('/', '_top');
+                    }
+                    if (res && JSON.stringify(res.data) == '{}') {
+                      window.open('/', '_top');
+                    }
+                    $('#username').val(res.data.username);
+                    $('#real_name').val(res.data.real_name);
+                    $('#birthday').val(res.data.birthday);
+                    $('#question').val(res.data.question);
+                    $('#answer').val(res.data.answer);
+                    // sex
+                    $("input[name=sex][value=" + res.data.sex + "]").attr("checked", true);
+                    $('#addr_county').val(res.data.addr_county);
+                    // 乡
+                    $.ajax({
+                      method: 'get',
+                      async: false,
+                      cache: false,
+                      xhrFields: {
+                        withCredentials: true
+                      },
+                      crossDomain: true,
+                      dataType: "json",
+                      url: '/api/other/get_township?county=' + res.data.addr_county,
+                      success: function (res) {
+                        var data = res.data;
+                        var select_township_html = '<option value="">请选择</option>';
+                        for (var i = 0; i < data.length; i++) {
+                          select_township_html += '<option value="' + data[i] + '">' + data[i] +
+                            '</option>';
+                        }
+                        $('#addr_township').html(select_township_html);
+                      },
+                      error: function () {
+                        console.log('error');
+                      }
+                    });
+                    $('#addr_township').val(res.data.addr_township);
+                  },
+                  error: function () {
+                    console.log('error');
+                  }
+                });
+              })
+            </script>
+            <!-- 模态框 -->
+            <div class="modal fade" id="change_info" style="margin-top: 150px;">
+              <div class="modal-dialog">
+                <div class="modal-content">
+
+                  <!-- 模态框头部 -->
+                  <div class="modal-header">
+                    <h4 class="modal-title">修改个人信息</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                  </div>
+
+                  <!-- 模态框主体 -->
+                  <div class="modal-body">
+                    <div id="info_slider" class="slider"></div>
+                    <!-- 滑动验证 -->
+                    <script type="text/javascript" src="/javascripts/jquery.slider.min.js"></script>
+                    <script>
+                      $("#info_slider").slider({
+                        callback: function (result) {
+                          if (result === true) {
+                            $("#change_user_info").removeClass('disabled');
+                          }
+                        }
+                      });
+                    </script>
+                  </div>
+
+                  <!-- 模态框底部 -->
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-primary disabled" id="change_user_info">修改个人信息</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                  </div>
+                  <script>
+                    $(document).ready(function () {
+                      $('#change_user_info').click(function () {
+                        if ($('#change_user_info').hasClass('disabled')) {
+                          return;
+                        }
+                        var username = $('#username').val().replace(' ', '');
+                        var real_name = $('#real_name').val().replace(' ', '');
+                        var birthday = $('#birthday').val();
+                        var sex = $("input[name='sex']:checked").val();;
+                        var addr_provence = $('#addr_provence').val();
+                        var addr_zhou = $('#addr_zhou').val();
+                        var addr_county = $('#addr_county').val();
+                        var addr_township = $('#addr_township').val();
+                        var question = $('#question').val().replace(' ', '');
+                        var answer = $('#answer').val().replace(' ', '');
+                        if (username === "" || username.indexOf("@") === -1) {
+                          $('.info_show').html('<div class="alert alert-danger">' +
+                            '<strong>提示!</strong> 登录名未填写或填写文本不包含@符号。' +
+                            '</div>')
+                          $("#info_slider").slider('restore');
+                          $('#change_info').modal('hide')
+                          $('#change_user_info').addClass('disabled');
+                        } else if (real_name === "") {
+                          $('.info_show').html('<div class="alert alert-danger">' +
+                            '<strong>提示!</strong> 用户名未填写。' +
+                            '</div>')
+                          $("#info_slider").slider('restore');
+                          $('#change_info').modal('hide')
+                          $('#change_user_info').addClass('disabled');
+                        } else if (birthday === "") {
+                          $('.info_show').html('<div class="alert alert-danger">' +
+                            '<strong>提示!</strong> 出生日期未填写或填写不规范。' +
+                            '</div>')
+                          $("#info_slider").slider('restore');
+                          $('#change_info').modal('hide')
+                          $('#change_user_info').addClass('disabled');
+                        } else if (sex === undefined) {
+                          $('.info_show').html('<div class="alert alert-danger">' +
+                            '<strong>提示!</strong> 未选择性别。' +
+                            '</div>')
+                          $("#info_slider").slider('restore');
+                          $('#change_info').modal('hide')
+                          $('#change_user_info').addClass('disabled');
+                        } else if (addr_county === "") {
+                          $('.info_show').html('<div class="alert alert-danger">' +
+                            '<strong>提示!</strong> 未选择用户所在县。' +
+                            '</div>')
+                          $("#info_slider").slider('restore');
+                          $('#change_info').modal('hide')
+                          $('#change_user_info').addClass('disabled');
+                        } else if (addr_township === "") {
+                          $('.info_show').html('<div class="alert alert-danger">' +
+                            '<strong>提示!</strong> 未选择用户所在乡。' +
+                            '</div>')
+                          $("#info_slider").slider('restore');
+                          $('#change_info').modal('hide')
+                          $('#change_user_info').addClass('disabled');
+                        } else if (question === "" || answer === "") {
+                          $('.info_show').html('<div class="alert alert-danger">' +
+                            '<strong>提示!</strong> 密保问题及答案设置不完整。' +
+                            '</div>')
+                          $("#info_slider").slider('restore');
+                          $('#change_info').modal('hide')
+                          $('#change_user_info').addClass('disabled');
+                        } else {
+                          var form_json = {
+                            username: username,
+                            real_name: real_name,
+                            birthday: birthday,
+                            sex: sex,
+                            addr_provence: addr_provence,
+                            addr_zhou: addr_zhou,
+                            addr_county: addr_county,
+                            addr_township: addr_township,
+                            question: question,
+                            answer: answer,
+                          }
+                          $.ajax({
+                            method: 'post',
+                            async: true,
+                            cache: false,
+                            // 数据类型必须为application/x-www-form-urlencoded之外的类型
+                            contentType: 'application/json;charset=utf-8',
+                            dataType: "json", // 数据返回类型
+                            url: '/api/user/change_person_info',
+                            data: JSON.stringify(form_json),
+                            success: function (res) {
+                              if (res.change_person_info_status === 'SUCCESS') {
+                                alert('修改成功，即将跳转到首页。')
+                                $.cookie('real_name', real_name, {
+                                  path: '/'
+                                })
+                                location.reload();
+                              } else {
+                                alert(res.message)
+                                $("#info_slider").slider('restore');
+                                $('#change_info').modal('hide')
+                                $('#change_user_info').addClass('disabled');
+                              }
+                            },
+                            error: function () {
+                              console.log('error');
+                            }
+                          });
+                        }
+                      })
+                    })
+                  </script>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="weather_email" class="container tab-pane"><br>
+          <h3>订阅气象提示</h3>
+          <div class="subscribe_weather">
+            <div class="subscribe_list">
+              <div class="subscribe_before">
+                <p class="sub_title">已订阅地区</p>
+                <div class="sub_list_info">
+                  <table class="table table-hover table-sm">
+                    <tbody class="sub_weather_table">
+                      <!-- <tr>
+                        <td class="sub_list_p">四川省&nbsp;-&nbsp;凉山彝族自治州&nbsp;-&nbsp;冕宁&nbsp;-&nbsp;先锋乡</td>
+                        <td><button type="button" class="btn btn-secondary btn-sm del_sub_btn">删除</button></td>
+                      </tr> -->
+                    </tbody>
+                  </table>
+                </div>
+                <script>
+                  $(document).ready(function () {
+                    $.ajax({
+                      method: 'post',
+                      async: true,
+                      cache: false,
+                      // 数据类型必须为application/x-www-form-urlencoded之外的类型
+                      contentType: 'application/json;charset=utf-8',
+                      dataType: "json", // 数据返回类型
+                      url: '/api/user/get_sub_weather',
+                      success: function (res) {
+                        // console.log(res);
+                        var sub_weather_html = '';
+                        for (var w = 0; w < res.sub_data.length; w++) {
+                          var place_dict = res.sub_data[w];
+                          sub_weather_html += '' +
+                            '<tr>' +
+                            '<td class="sub_list_p">四川省&nbsp;-&nbsp;凉山彝族自治州&nbsp;-&nbsp;' +
+                            place_dict.sub_addr_county + '&nbsp;-&nbsp;' + place_dict.sub_addr_township +
+                            '</td>' +
+                            '<td><button type="button" class="btn btn-secondary btn-sm del_sub_btn" value="' +
+                            place_dict.pri_key + '">删除</button></td>' +
+                            '</tr>'
+                        }
+                        $('.sub_weather_table').html(sub_weather_html);
+
+                        $('.del_sub_btn').click(function () {
+                          var pri_key = $(this).val() || '';
+                          if (pri_key !== '') {
+                            $.ajax({
+                              method: 'post',
+                              async: true,
+                              cache: false,
+                              // 数据类型必须为application/x-www-form-urlencoded之外的类型
+                              contentType: 'application/json;charset=utf-8',
+                              dataType: "json", // 数据返回类型
+                              data: JSON.stringify({
+                                'pri_key': pri_key
+                              }),
+                              url: '/api/user/del_sub_weather',
+                              success: function (res) {
+                                if (res.del_status === 'SUCCESS') {
+                                  location.reload();
+                                } else {
+                                  alert('删除失败，请刷新后重试！')
+                                }
+                              },
+                              error: function () {
+                                console.log('error');
+                              }
+                            });
+                          }
+                        })
+                      },
+                      error: function () {
+                        console.log('error');
+                      }
+                    });
+                  })
+                </script>
+              </div>
+              <div class="subscribe_after">
+                <p class="sub_title">订阅其他地区气象信息</p>
+                <div class="sub_after_select">
+                  <div class="place_select">
+                    <select class="form-control addr" id="sub_addr_provence" disabled style="width: 150px;">
+                      <option selected value="四川省">四川省</option>
+                    </select>
+                    <select class="form-control addr" id="sub_addr_zhou" disabled style="width: 150px;">
+                      <option selected value="凉山彝族自治州">凉山彝族自治州</option>
+                    </select>
+                    <div style="clear: both;"></div>
+                    <select class="form-control addr addr_o" id="sub_addr_county" style="width: 150px;">
+                      <option value="">请选择</option>
+                    </select>
+                    <select class="form-control addr addr_o" id="sub_addr_township" style="width: 150px;">
+                      <option value="">请选择</option>
+                    </select>
+                  </div>
+                  <script>
+                    $(document).ready(function () {
+                      // 县
+                      $.ajax({
+                        method: 'get',
+                        async: false,
+                        cache: false,
+                        xhrFields: {
+                          withCredentials: true
+                        },
+                        crossDomain: true,
+                        dataType: "json",
+                        url: '/api/other/get_county',
+                        success: function (res) {
+                          var data = res.data;
+                          var select_county_html = '<option value="">请选择</option>';
+                          for (var i = 0; i < data.length; i++) {
+                            select_county_html += '<option value="' + data[i] + '">' + data[i] + '</option>';
+                          }
+                          $('#sub_addr_county').html(select_county_html);
+                        },
+                        error: function () {
+                          console.log('error');
+                        }
+                      });
+                      // 乡
+                      $('#sub_addr_county').change(function () {
+                        var county = $('#sub_addr_county').val();
+                        $.ajax({
+                          method: 'get',
+                          async: false,
+                          cache: false,
+                          xhrFields: {
+                            withCredentials: true
+                          },
+                          crossDomain: true,
+                          dataType: "json",
+                          url: '/api/other/get_township?county=' + county,
+                          success: function (res) {
+                            var data = res.data;
+                            var select_township_html = '<option value="">请选择</option>';
+                            for (var i = 0; i < data.length; i++) {
+                              select_township_html += '<option value="' + data[i] + '">' + data[i] +
+                                '</option>';
+                            }
+                            $('#sub_addr_township').html(select_township_html);
+                          },
+                          error: function () {
+                            console.log('error');
+                          }
+                        });
+                      })
+                    })
+                  </script>
+                  <div id="sub_slider" class="slider" style="margin-left: 20px;"></div>
+                  <!-- 滑动验证 -->
+                  <script type="text/javascript" src="/javascripts/jquery.slider.min.js"></script>
+                  <script>
+                    $("#sub_slider").slider({
+                      callback: function (result) {
+                        if (result === true) {
+                          $("#sub_other_palce").removeClass('disabled');
+                        }
+                      }
+                    });
+                  </script>
+                  <br>
+                  <button type="button" class="btn btn-primary disabled" style="margin-left: 20px;"
+                    id="sub_other_palce">订阅此地区气象信息</button>
+                  <div class="sub_show">
+
+                  </div>
+                  <script>
+                    $(document).ready(function () {
+                      $('#sub_other_palce').click(function () {
+                        if ($('#sub_other_palce').hasClass('disabled')) {
+                          return;
+                        } else {
+                          var sub_addr_provence = '四川省';
+                          var sub_addr_zhou = '凉山彝族自治州';
+                          var sub_addr_county = $('#sub_addr_county').val() || '';
+                          var sub_addr_township = $('#sub_addr_township').val() || '';
+                          if (sub_addr_county === '') {
+                            $('.sub_show').html('<div class="alert alert-danger">' +
+                              '<strong>提示!</strong> 未选择用户所在县。' +
+                              '</div>')
+                          } else if (sub_addr_township === '') {
+                            $('.sub_show').html('<div class="alert alert-danger">' +
+                              '<strong>提示!</strong> 未选择用户所在乡。' +
+                              '</div>')
+                          } else {
+                            var form_json = {
+                              'sub_addr_provence': sub_addr_provence,
+                              'sub_addr_zhou': sub_addr_zhou,
+                              'sub_addr_county': sub_addr_county,
+                              'sub_addr_township': sub_addr_township,
+                            }
+                            $.ajax({
+                              method: 'post',
+                              async: true,
+                              cache: false,
+                              // 数据类型必须为application/x-www-form-urlencoded之外的类型
+                              contentType: 'application/json;charset=utf-8',
+                              dataType: "json", // 数据返回类型
+                              url: '/api/user/sub_weather',
+                              data: JSON.stringify(form_json),
+                              success: function (res) {
+                                alert(res.message);
+                                if (res.sub_status === 'SUCCESS') {
+                                  // 刷新已订阅地区数据
+                                  $.ajax({
+                                    method: 'post',
+                                    async: true,
+                                    cache: false,
+                                    // 数据类型必须为application/x-www-form-urlencoded之外的类型
+                                    contentType: 'application/json;charset=utf-8',
+                                    dataType: "json", // 数据返回类型
+                                    url: '/api/user/get_sub_weather',
+                                    success: function (res) {
+                                      // console.log(res);
+                                      var sub_weather_html = '';
+                                      for (var w = 0; w < res.sub_data.length; w++) {
+                                        var place_dict = res.sub_data[w];
+                                        sub_weather_html += '' +
+                                          '<tr>' +
+                                          '<td class="sub_list_p">四川省&nbsp;-&nbsp;凉山彝族自治州&nbsp;-&nbsp;' +
+                                          place_dict.sub_addr_county + '&nbsp;-&nbsp;' +
+                                          place_dict.sub_addr_township + '</td>' +
+                                          '<td><button type="button" class="btn btn-secondary btn-sm del_sub_btn" value="' +
+                                          place_dict.pri_key + '">删除</button></td>' +
+                                          '</tr>'
+                                      }
+                                      $('.sub_weather_table').html(sub_weather_html);
+
+                                      $('.del_sub_btn').click(function () {
+                                        var pri_key = $(this).val() || '';
+                                        if (pri_key !== '') {
+                                          $.ajax({
+                                            method: 'post',
+                                            async: true,
+                                            cache: false,
+                                            // 数据类型必须为application/x-www-form-urlencoded之外的类型
+                                            contentType: 'application/json;charset=utf-8',
+                                            dataType: "json", // 数据返回类型
+                                            data: JSON.stringify({
+                                              'pri_key': pri_key
+                                            }),
+                                            url: '/api/user/del_sub_weather',
+                                            success: function (res) {
+                                              if (res.del_status === 'SUCCESS') {
+                                                location.reload();
+                                              } else {
+                                                alert('删除失败，请刷新后重试！')
+                                              }
+                                            },
+                                            error: function () {
+                                              console.log('error');
+                                            }
+                                          });
+                                        }
+                                      })
+                                    },
+                                    error: function () {
+                                      console.log('error');
+                                    }
+                                  });
+                                }
+                              },
+                              error: function () {
+                                console.log('error');
+                              }
+                            });
+                            $('#sub_other_palce').addClass('disabled');
+                            $("#sub_slider").slider('restore');
+                          }
+                        }
+                      })
+                    })
+                  </script>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="change_pwd" class="container tab-pane"><br>
+          <h3>修改密码</h3>
+          <div class="change_passwd">
+            <div class="change_pwd_dev">
+              <div class="form-group">
+                <label for="pwd">旧密码：</label>
+                <input type="password" class="form-control" id="old_pwd" name="old_pwd" maxlength="20">
+              </div>
+              <div class="form-group">
+                <label for="pwd">新密码：</label>
+                <input type="password" class="form-control" id="new_pwd" name="new_pwd" maxlength="20">
+              </div>
+              <div class="form-group">
+                <label for="pwd">再次输入新密码：</label>
+                <input type="password" class="form-control" id="new_pwd_t" name="new_pwd_t" maxlength="20">
+              </div>
+              <div id="change_pwd_slider" class="slider"></div>
+              <!-- 滑动验证 -->
+              <script type="text/javascript" src="/javascripts/jquery.slider.min.js"></script>
+              <script>
+                $("#change_pwd_slider").slider({
+                  callback: function (result) {
+                    if (result === true) {
+                      $("#change_pwd_btn").removeClass('disabled');
+                    }
+                  }
+                });
+              </script>
+              <br>
+              <div>
+                <button type="button" class="btn btn-primary btn-block btn-lg disabled"
+                  id="change_pwd_btn">修改密码</button>
+              </div>
+              <br>
+              <div class="change_passwd_show">
+
+              </div>
+              <script>
+                $(document).ready(function () {
+                  $('#change_pwd_btn').click(function () {
+                    if ($('#change_pwd_btn').hasClass('disabled')) {
+                      return;
+                    } else {
+                      var old_pwd = $('#old_pwd').val().replace(' ', '') || '';
+                      var new_pwd = $('#new_pwd').val().replace(' ', '') || '';
+                      var new_pwd_t = $('#new_pwd_t').val().replace(' ', '') || '';
+                      if (old_pwd === '') {
+                        $('.change_passwd_show').html('<div class="alert alert-danger">' +
+                          '<strong>提示!</strong> 旧密码不能为空。' +
+                          '</div>')
+                        $('#change_pwd_btn').addClass('disabled');
+                        $("#change_pwd_slider").slider('restore');
+                      } else if (new_pwd === '') {
+                        $('.change_passwd_show').html('<div class="alert alert-danger">' +
+                          '<strong>提示!</strong> 新密码不能为空。' +
+                          '</div>')
+                        $('#change_pwd_btn').addClass('disabled');
+                        $("#change_pwd_slider").slider('restore');
+                      } else if (new_pwd !== new_pwd_t) {
+                        $('.change_passwd_show').html('<div class="alert alert-danger">' +
+                          '<strong>提示!</strong> 两次输入的新密码不相同。' +
+                          '</div>')
+                        $('#change_pwd_btn').addClass('disabled');
+                        $("#change_pwd_slider").slider('restore');
+                      } else {
+                        var form_json = {
+                          'old_pwd': old_pwd,
+                          'new_pwd': new_pwd
+                        }
+                        $.ajax({
+                          method: 'post',
+                          async: true,
+                          cache: false,
+                          // 数据类型必须为application/x-www-form-urlencoded之外的类型
+                          contentType: 'application/json;charset=utf-8',
+                          dataType: "json", // 数据返回类型
+                          data: JSON.stringify(form_json),
+                          url: '/api/user/change_pwd',
+                          success: function (res) {
+                            if (res.change_pwd_status === 'ERROR') {
+                              $('#change_pwd_btn').addClass('disabled');
+                              $("#change_pwd_slider").slider('restore');
+                            }
+                            alert(res.message);
+                            location.reload();
+                          },
+                          error: function () {
+                            console.log('error');
+                          }
+                        });
+                      }
+                    }
+                  })
+                })
+              </script>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+</body>
+
+</html>

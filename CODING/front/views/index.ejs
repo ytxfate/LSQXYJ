@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel="Shortcut Icon" href="/images/favicon.ico">
+  <meta charset="UTF-8">
+  <title>凉山气象预报预警系统</title>
+  <!-- CSS -->
+  <link rel='stylesheet' href='/stylesheets/style.css' />
+  <link rel="stylesheet" href="/stylesheets/index.css">
+  <!-- JS -->
+  <!-- jQuery -->
+  <script type="text/javascript" src="/javascripts/jquery-3.3.1.slim.min.js"></script>
+  <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
+  <script type="text/javascript" src="/javascripts/jquery.cookie.min.js"></script>
+  <!-- 滑动验证 -->
+  <link rel="stylesheet" href="/stylesheets/jquery.slider.css">
+  <!-- bootstrap -->
+  <link rel="stylesheet" href="/stylesheets/bootstrap.min.css">
+  <script type="text/javascript" src="/javascripts/bootstrap.min.js"></script>
+  <script type="text/javascript" src="/javascripts/popper.min.js"></script>
+  <!-- jQuery UI -->
+  <link rel="stylesheet" href="/stylesheets/jquery-ui.css">
+  <script type="text/javascript" src="/javascripts/jquery-ui.min.js"></script>
+  <!-- 百度 map API -->
+  <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=PnQZjYEi40I2OB03o2BMGeChzYWCIyUe"></script>
+  <script type="text/javascript" src="http://api.map.baidu.com/library/AreaRestriction/1.2/src/AreaRestriction_min.js">
+  </script>
+  <!-- 图标 -->
+  <link rel="stylesheet" href="/stylesheets/font-awesome.min.css">
+  <script>
+    $(document).ready(function () {
+      $.ajax({
+        method: 'post',
+        async: true,
+        cache: false,
+        // 数据类型必须为application/x-www-form-urlencoded之外的类型
+        contentType: 'application/json;charset=utf-8',
+        dataType: "json", // 数据返回类型
+        url: '/api/user/test_user',
+        success: function (res) {
+          console.log(res);
+          if (res && res.user_login_stat === 'ERROR') {
+            $.cookie('user_session', '', {
+              expires: -1
+            })
+            $.cookie('user_name', '', {
+              expires: -1
+            })
+            $.cookie('real_name', '', {
+              expires: -1
+            })
+          }
+        },
+        error: function () {
+          console.log('error');
+        }
+      });
+    })
+  </script>
+</head>
+
+<body>
+  <div class="container-fluid main_div">
+    <div class="row" style="height: 100%">
+      <div class="col-lg-2 win_left">
+        <div class="left_head">
+          <h2 class="text-center">凉山气象</h2>
+          <h4 class="text-center">预报预警系统</h4>
+        </div>
+        <div class="palce_select">
+          <select class="form-control" onchange=select_area_change(value)>
+            <option selected value="">选择县级地区</option>
+            <option value="凉山州">凉山州</option>
+            <option value="会东县">会东县</option>
+            <option value="会理县">会理县</option>
+            <option value="冕宁县">冕宁县</option>
+            <option value="喜德县">喜德县</option>
+            <option value="宁南县">宁南县</option>
+            <option value="布拖县">布拖县</option>
+            <option value="德昌县">德昌县</option>
+            <option value="昭觉县">昭觉县</option>
+            <option value="普格县">普格县</option>
+            <option value="木里县">木里县</option>
+            <option value="甘洛县">甘洛县</option>
+            <option value="盐源县">盐源县</option>
+            <option value="美姑县">美姑县</option>
+            <option value="西昌市">西昌市</option>
+            <option value="越西县">越西县</option>
+            <option value="金阳县">金阳县</option>
+            <option value="雷波县">雷波县</option>
+          </select>
+        </div>
+        <!-- <div class="warning_info">
+          <h4>气象预警信息</h4>
+          <div class="warning_detail">
+            <div class="warning_detail_info" data-toggle="modal" data-target="#test">
+              <p>道路结冰</p>
+              <i></i>
+            </div>
+            <div class="warning_detail_info"></div>
+            <div class="warning_detail_info"></div>
+            <div class="warning_detail_info"></div>
+            <div class="warning_detail_info"></div>
+            <div class="warning_detail_info"></div>
+          </div>
+          <div class="warning_modal">
+
+            <div class="modal fade" id="test">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h4 class="modal-title">模态框头部</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                  </div>
+                  <div class="modal-body">
+                    模态框内容..
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div> -->
+        <div class="user_div">
+          <div class="user_head">
+            <i id="user_head_font" class="fa fa-user user_head_img"
+              style="font-size: 40px; color: rgb(156, 156, 156); cursor: pointer;"></i>
+          </div>
+          <div class="user_info">
+          </div>
+          <!-- user login 模态框 -->
+          <div class="modal fade" id="user_login" style="margin-top: 150px;">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <!-- 模态框头部 -->
+                <div class="modal-header">
+                  <h4 class="modal-title">用户登录</h4>
+                  <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <!-- 模态框主体 -->
+                <div class="modal-body">
+                  <form>
+                    <div class="form-group">
+                      <label for="usr">用户名:</label>
+                      <input type="text" class="form-control" id="username" maxlength="20">
+                    </div>
+                    <div class="form-group">
+                      <label for="pwd">密&nbsp;&nbsp;码:</label>
+                      <input type="password" class="form-control" id="password" maxlength="20">
+                    </div>
+                    <div class="form-group">
+                      <div id="login_slider" class="slider"></div>
+                    </div>
+                    <!-- 滑动验证 -->
+                    <script type="text/javascript" src="/javascripts/jquery.slider.min.js"></script>
+                    <script>
+                      $("#login_slider").slider({
+                        callback: function (result) {
+                          if (result === true) {
+                            $("#login_system").removeClass('disabled');
+                          }
+                        }
+                      });
+                    </script>
+                  </form>
+                  <div class="login_show">
+                    <div class="alert alert-info">
+                      <strong>提示!</strong> 欢迎登录凉山气象预报预警系统。
+                    </div>
+                  </div>
+                  <a href="/user/forget_password" target="_top" class="float-right">忘记密码（找回密码）</a>
+                </div>
+                <!-- 模态框底部 -->
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-primary disabled" id='login_system'>登录</button>
+                  <button type="button" class="btn btn-primary" id='register_user'>注册</button>
+                  <!-- <button type="button" class="btn btn-primary" id='forget_pwd'>忘记密码（找回密码）</button> -->
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                </div>
+                <script>
+                  $(document).ready(function () {
+                    // 注册
+                    $('#register_user').click(function () {
+                      window.open('/user/register', '_top');
+                    });
+                    //  // 忘记密码（找回密码）
+                    //  $('#forget_pwd').click(function(){
+                    //   window.open('/user/forget_password', '_top');
+                    // });
+                    // 登录
+                    $('#login_system').click(function () {
+                      if ($('#login_system').hasClass('disabled')) {
+                        return;
+                      }
+                      var username = $('#username').val().replace(' ', '');
+                      var password = $('#password').val().replace(' ', '');
+                      if (username === '' || password === '') {
+                        var mes_div_html = '' +
+                          '<div class="alert alert-warning">' +
+                          '<strong>警告!</strong> 用户名或密码为空！' +
+                          '</div>';
+                        $('.login_show').html(mes_div_html);
+                        $("#login_slider").slider('restore');
+                        $("#login_system").addClass('disabled');
+                      } else {
+                        $.ajax({
+                          method: 'post',
+                          async: true,
+                          cache: false,
+                          // 数据类型必须为application/x-www-form-urlencoded之外的类型
+                          contentType: 'application/json;charset=utf-8',
+                          dataType: "json", // 数据返回类型
+                          url: '/api/user/login',
+                          data: JSON.stringify({
+                            "username": username,
+                            "password": password
+                          }),
+                          success: function (res) {
+                            if (res.login_status === 'ERROR') {
+                              $("#login_slider").slider('restore');
+                              $("#login_system").addClass('disabled');
+                              var mes_div_html = '' +
+                                '<div class="alert alert-danger">' +
+                                '<strong>错误!</strong> ' + res.message +
+                                '</div>';
+                              $('.login_show').html(mes_div_html);
+                            } else if (res.login_status === 'SUCCESS') {
+                              $.cookie('user_session', res.user_session)
+                              $.cookie('user_name', username)
+                              $.cookie('real_name', res.real_name)
+                              // 刷新页面
+                              location.reload();
+                            }
+                          },
+                          error: function () {
+                            console.log('error');
+                          }
+                        });
+                      }
+                    });
+                  });
+                </script>
+              </div>
+            </div>
+          </div>
+          <script>
+            $(document).ready(function () {
+              $('.user_head').hover(function () {
+                $('.user_head').css('background-color', 'rgb(156, 156, 156)');
+                $('.user_head_img').css('color', 'white');
+              }, function () {
+                $('.user_head').css('background-color', 'white');
+                $('.user_head_img').css('color', 'rgb(156, 156, 156)');
+              });
+              // 头像事件
+              $('.user_head').click(function () {
+                // 动态加载 user_info
+                $('.user_info').toggle(500);
+                var real_name = $.cookie('real_name');
+                if (real_name === undefined) {
+                  var user_info_html =
+                    '<a class="please_login" href="" style="display: grid;cursor: pointer;text-align: center;padding-top: 30px;font-size: 14px;" data-toggle="modal" data-target="#user_login">登录/注册</a>';
+                  $('.user_info').html(user_info_html)
+                } else {
+                  var user_info_html = '<ul class="nav flex-column">' +
+                    '<li class="nav-item">' +
+                    '<a class="nav-link disabled" href="#">' + real_name + '</a>' +
+                    '</li>' +
+                    '<li class="nav-item">' +
+                    '<a class="nav-link" href="/user/main">个人信息主页</a>' +
+                    '</li>' +
+                    '<li class="nav-item">' +
+                    '<a class="nav-link" href="#" id="logout">退出登录</a>' +
+                    '</li>' +
+                    '</ul>';
+                  $('.user_info').html(user_info_html)
+                  $('#logout').click(function () {
+                    $.ajax({
+                      method: 'post',
+                      async: true,
+                      cache: false,
+                      // 数据类型必须为application/x-www-form-urlencoded之外的类型
+                      contentType: 'application/json;charset=utf-8',
+                      dataType: "json", // 数据返回类型
+                      url: '/api/user/logout',
+                      success: function (res) {
+                        console.log(res);
+                        $.cookie('user_session', '', {
+                          expires: -1
+                        })
+                        $.cookie('user_name', '', {
+                          expires: -1
+                        })
+                        $.cookie('real_name', '', {
+                          expires: -1
+                        })
+                        location.reload();
+                      },
+                      error: function () {
+                        console.log('error');
+                      }
+                    });
+                  })
+                }
+              });
+            });
+          </script>
+        </div>
+      </div>
+      <div id="map_all" class="map_div col-lg-8" style="height: 100%"></div>
+      <div class="col-lg-2 win_right" style="height: 100%">
+        <div id='area_weather_data' class="win_right_weather">
+          <!-- <div class="show_area_info">
+            <div class="area_weather_left">
+              <div class="area_weather_name">冕宁</div>
+            </div>
+            <div class="area_weather_right">
+              <img src="/images/icons/夜间-中雨-大雨.gif" alt="" srcset="">
+            </div>
+          </div> -->
+        </div>
+      </div>
+    </div>
+  </div>
+  <script type="text/javascript">
+    function set_map_bounds(map) {
+      var bs = map.getBounds(); //获取可视区域
+      var bssw = bs.getSouthWest(); //可视区域左下角
+      var bsne = bs.getNorthEast(); //可视区域右上角
+      var b = new BMap.Bounds(bssw, bsne);
+      try {
+        BMapLib.AreaRestriction.setBounds(map, b);
+      } catch (e) {
+        alert(e);
+      }
+      // alert("当前地图可视范围是：" + bssw.lng + "," + bssw.lat + "到" + bsne.lng + "," + bsne.lat);
+    }
+    // 百度地图API功能
+    var map = new BMap.Map("map_all", {
+      minZoom: 9,
+      maxZoom: 17
+    }); // 创建Map实例
+    // 设置地图显示范围
+    var b = new BMap.Bounds(new BMap.Point(98.5, 24.825), new BMap.Point(105.5, 38.25));
+
+    try {
+      BMapLib.AreaRestriction.setBounds(map, b);
+    } catch (e) {
+      alert(e);
+    }
+
+    // 禁用缩放（鼠标及双击缩放）
+    map.disableDoubleClickZoom(true);
+    map.disableScrollWheelZoom(true);
+    // map.disableDragging(); //禁止拖拽
+
+    function getBoundary(name) {
+      var bdary = new BMap.Boundary();
+      bdary.get(name, function (rs) { //获取行政区域
+        map.clearOverlays(); //清除地图覆盖物       
+        var count = rs.boundaries.length; //行政区域的点有多少个
+        if (count === 0) {
+          alert('未能获取当前输入行政区域');
+          return;
+        }
+        var pointArray = [];
+        for (var i = 0; i < count; i++) {
+          var ply = new BMap.Polygon(rs.boundaries[i], {
+            strokeWeight: 2,
+            strokeColor: "#336633",
+            fillColor: "#CCFFFF",
+            fillOpacity: 0.1
+          }); //建立多边形覆盖物
+          map.addOverlay(ply); //添加覆盖物
+          pointArray = pointArray.concat(ply.getPath());
+        }
+        getWeatherInfo(name);
+        map.setViewport(pointArray); //调整视野  
+        set_map_bounds(map);
+      });
+    }
+    var url_globle = '/api';
+
+    function getWeatherInfo(name) {
+      $.get(url_globle + '/search/get_area_weather_info?area=' + name, function (data, status) {
+        // 右边 div
+        div_right_info = ''
+        console.log(data);
+        for (var i = 0; i < data.length; i++) {
+          data_i = data[i];
+          father = data_i.father || '';
+          data_area = data_i.area || '';
+          data_weather = data_i.weather || '';
+          div_right_info += '' +
+            '<a href="get_area_weather_detail?area=' + data_area + '&father=' + father +
+            '" class="show_area_a" title="' + data_area + " -- " + data_weather.slice(3) +
+            '"><div class="show_area_info">' +
+            '<div class="area_weather_left">' +
+            '<div class="area_weather_name">' + data_area + '</div>' +
+            '</div>' +
+            '<div class="area_weather_right">' +
+            '<img src="/images/icons/' + data_weather + '.gif" alt="" srcset="">' +
+            '</div>' +
+            '</div></a>'
+        }
+        // 加载数据
+        $('#area_weather_data').empty()
+        $('#area_weather_data').append(div_right_info);
+        $.get("/javascripts/div_weather_event.js");
+      });
+
+      function createTag(marker, data) {
+        var color = '';
+        switch (data.signalLevel) {
+          case '黄色':
+            color = '#FFD700';
+            break;
+          case '红色':
+            color = '#FF3030';
+            break;
+          case '蓝色':
+            color = '#00BFFF';
+            break;
+          case '橙色':
+            color = '#EE9A00';
+            break;
+          default:
+            color = '#FFFFFF';
+            break;
+        }
+        //标注
+        var text = '' +
+          "<div class='show_info'>" +
+          "<span class='show_info_where'>" + data.stationName + "</span>" +
+          "<span class='show_info_warn' style='color:" + color + ";'>" + data.signalType +
+          '<small class="show_info_warn_oth">（' + data.signalLevel + "预警）</small></span>" +
+          "<p>" + data.issueContent + "</p>" +
+          "</div>"
+        //给标记添加点击事件以及显示窗口信息
+        var infoWindow = new BMap.InfoWindow(text);
+        marker.addEventListener("click", function () {
+          this.openInfoWindow(infoWindow);
+        });
+      }
+
+
+      $.get(url_globle + '/search/get_warning_weather', function (data, status) {
+        for (var i = 0; i < data.length; i++) {
+          var d = data[i];
+
+          var myIcon = new BMap.Icon("/images/warn_icon/" + d.img_url, new BMap.Size(50, 40));
+          myIcon.setImageSize(new BMap.Size(50, 40));
+          var pt = new BMap.Point(d.jd, d.wd);
+          var marker = new BMap.Marker(pt, {
+            icon: myIcon
+          }, {
+            enableMassClear: false
+          });
+          map.addOverlay(marker);
+          createTag(marker, d);
+        }
+      });
+    }
+    // 初始化
+    getBoundary('凉山州');
+    // 下拉框事件
+    function select_area_change(value) {
+      if (value) {
+        // 下拉框数据变化，动态改变地图显示地区
+        // getBoundary(value);
+        getWeatherInfo(value);
+      }
+      return;
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel="Shortcut Icon" href="/images/favicon.ico">
+  <meta charset="UTF-8">
+  <title>凉山气象预报预警系统-用户注册</title>
+  <!-- CSS -->
+  <link rel='stylesheet' href='/stylesheets/style.css' />
+  <link rel="stylesheet" href="/stylesheets/user_register.css">
+  <!-- JS -->
+  <!-- jQuery -->
+  <script type="text/javascript" src="/javascripts/jquery-3.3.1.slim.min.js"></script>
+  <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
+  <script type="text/javascript" src="/javascripts/jquery.cookie.min.js"></script>
+  <!-- 滑动验证 -->
+  <link rel="stylesheet" href="/stylesheets/jquery.slider.css">
+  <!-- bootstrap -->
+  <link rel="stylesheet" href="/stylesheets/bootstrap.min.css">
+  <script type="text/javascript" src="/javascripts/bootstrap.min.js"></script>
+  <script type="text/javascript" src="/javascripts/popper.min.js"></script>
+  <!-- jQuery UI -->
+  <link rel="stylesheet" href="/stylesheets/jquery-ui.css">
+  <script type="text/javascript" src="/javascripts/jquery-ui.min.js"></script>
+  <!-- 百度 map API -->
+  <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=PnQZjYEi40I2OB03o2BMGeChzYWCIyUe">
+  </script>
+  <script type="text/javascript" src="http://api.map.baidu.com/library/AreaRestriction/1.2/src/AreaRestriction_min.js">
+  </script>
+  <!-- 图标 -->
+  <link rel="stylesheet" href="/stylesheets/font-awesome.min.css">
+  <script>
+    var timed_c = 60;
+    var timed_t = null;
+
+    function timedCount() {
+      $('#get_email_code').text('点击获取邮箱验证码（一分钟后可再次获取）' + timed_c);
+      timed_c--;
+      timed_t = setTimeout("timedCount()", 1000);
+      if (timed_c < 0) {
+        clearTimeout(timed_t);
+        $('#get_email_code').removeClass('disabled');
+        $('#get_email_code').text('点击获取邮箱验证码');
+        timed_c = 60;
+        timed_t = null;
+      }
+    }
+  </script>
+</head>
+
+<body>
+  <div class="container main_body">
+    <div class="top_info">
+      <h3>凉山气象预报预警系统 -- 用户注册</h3>
+      <p>为你提供凉山地区详细的天气预报及预警信息。</p>
+    </div>
+    <div class="register_info">
+      <div class="register_form">
+        <div class="alert alert-info">
+          <strong>提示!</strong> 请使用邮箱进行注册。
+        </div>
+        <!-- <form> -->
+        <div class="form-group">
+          <label for="username">登录名：</label>
+          <input type="email" class="form-control" id="username" placeholder="用户邮箱" maxlength="20">
+        </div>
+        <div class="form-group">
+          <label for="real_name">用户名：</label>
+          <input type="text" class="form-control" id="real_name" placeholder="用户名" maxlength="20">
+        </div>
+        <div class="form-group">
+          <label for="password">密码：</label>
+          <input type="password" class="form-control" id="password" placeholder="用户密码" maxlength="20">
+        </div>
+        <div class="form-group">
+          <label for="birthday">出生年月：</label>
+          <input type="date" class="form-control" id="birthday">
+        </div>
+        <div class="form-group">
+          <label for="sex">性别：</label>
+          <label class="radio-inline sex_redio"><input type="radio" name="sex" value="男">男</label>
+          <label class="radio-inline sex_redio"><input type="radio" name="sex" value="女">女</label>
+        </div>
+        <div class="form-group">
+          <label for="birthday">地址：</label><br>
+          <select class="form-control addr" id="addr_provence" disabled style="width: 150px;">
+            <option selected value="四川省">四川省</option>
+          </select>
+          <select class="form-control addr" id="addr_zhou" disabled style="width: 150px;">
+            <option selected value="凉山彝族自治州">凉山彝族自治州</option>
+          </select>
+          <div style="clear: both;"></div>
+          <select class="form-control addr addr_o" id="addr_county" style="width: 150px;">
+            <option value="">请选择</option>
+          </select>
+          <select class="form-control addr addr_o" id="addr_township" style="width: 150px;">
+            <option value="">请选择</option>
+          </select>
+        </div>
+        <script>
+          $(document).ready(function () {
+            // 县
+            $.ajax({
+              method: 'get',
+              async: false,
+              cache: false,
+              xhrFields: {
+                withCredentials: true
+              },
+              crossDomain: true,
+              dataType: "json",
+              url: '/api/other/get_county',
+              success: function (res) {
+                var data = res.data;
+                var select_county_html = '<option value="">请选择</option>';
+                for (var i = 0; i < data.length; i++) {
+                  select_county_html += '<option value="' + data[i] + '">' + data[i] + '</option>';
+                }
+                $('#addr_county').html(select_county_html);
+              },
+              error: function () {
+                console.log('error');
+              }
+            });
+            // 乡
+            $('#addr_county').change(function () {
+              var county = $('#addr_county').val();
+              $.ajax({
+                method: 'get',
+                async: false,
+                cache: false,
+                xhrFields: {
+                  withCredentials: true
+                },
+                crossDomain: true,
+                dataType: "json",
+                url: '/api/other/get_township?county=' + county,
+                success: function (res) {
+                  var data = res.data;
+                  var select_township_html = '<option value="">请选择</option>';
+                  for (var i = 0; i < data.length; i++) {
+                    select_township_html += '<option value="' + data[i] + '">' + data[i] + '</option>';
+                  }
+                  $('#addr_township').html(select_township_html);
+                },
+                error: function () {
+                  console.log('error');
+                }
+              });
+            })
+          })
+        </script>
+        <div style="clear: both;"></div>
+        <div class="form-group" style="border: 1px solid #CCC;padding: 10px;border-radius: 5px;">
+          <label>密保设置(用于找回密码)</label><br>
+          <label for="question">问题：</label>
+          <input type="text" class="form-control" id="question" maxlength="50">
+          <label for="answer">答案：</label>
+          <input type="text" class="form-control" id="answer" maxlength="50">
+        </div>
+        <div class="form-group">
+          <label for="email_code">邮箱验证码：</label> <button class="btn btn-primary btn-sm"
+            id='get_email_code'>点击获取邮箱验证码</button>
+          <input type="text" class="form-control" id="email_code" maxlength="10">
+        </div>
+        <script>
+          $('#get_email_code').click(function () {
+            if ($('#get_email_code').hasClass('disabled')) {
+              return;
+            } else {
+              var username = $('#username').val().replace(' ', '');
+              if (username === '') {
+                alert('登录名未填写或填写文本不包含@符号。');
+                return
+              } else {
+                $('#get_email_code').addClass('disabled')
+                $('#get_email_code').text('点击获取邮箱验证码（一分钟后可再次获取）')
+                $.ajax({
+                  method: 'post',
+                  async: true,
+                  cache: false,
+                  // 数据类型必须为application/x-www-form-urlencoded之外的类型
+                  contentType: 'application/json;charset=utf-8',
+                  dataType: "json", // 数据返回类型
+                  url: '/api/other/register_email_code',
+                  data: JSON.stringify({
+                    "email_str": username
+                  }),
+                  success: function (res) {
+                    if (res.send_status === 'SUCCESS') {
+                      alert('邮箱验证码已经发送到用户邮箱，请注意查收。')
+                    }
+                  },
+                  error: function () {
+                    console.log('error');
+                  }
+                });
+                timedCount();
+              }
+            }
+          })
+        </script>
+        <div class="form-group">
+          <div id="login_slider" class="slider"></div>
+        </div>
+        <!-- 滑动验证 -->
+        <script type="text/javascript" src="/javascripts/jquery.slider.min.js"></script>
+        <script>
+          $("#login_slider").slider({
+            callback: function (result) {
+              if (result === true) {
+                $("#register_btn").removeClass('disabled');
+              }
+            }
+          });
+        </script>
+        <!-- </form> -->
+        <div>
+          <br>
+          <button class="btn btn-primary btn-block disabled" id="register_btn">注&nbsp;&nbsp;&nbsp;&nbsp;册</button>
+        </div>
+        <a href="/" class="float-right">返回首页</a>
+        <div class="info_show" style="clear: both;margin-top: 25px;">
+        </div>
+        <script>
+          $(document).ready(function () {
+            $('#register_btn').click(function () {
+              if ($('#register_btn').hasClass('disabled')) {
+                return;
+              }
+              var username = $('#username').val().replace(' ', '');
+              var real_name = $('#real_name').val().replace(' ', '');
+              var password = $('#password').val().replace(' ', '');
+              var birthday = $('#birthday').val();
+              var sex = $("input[name='sex']:checked").val();;
+              var addr_provence = $('#addr_provence').val();
+              var addr_zhou = $('#addr_zhou').val();
+              var addr_county = $('#addr_county').val();
+              var addr_township = $('#addr_township').val();
+              var question = $('#question').val().replace(' ', '');
+              var answer = $('#answer').val().replace(' ', '');
+              var email_code = $('#email_code').val().replace(' ', '');
+              if (username === "" || username.indexOf("@") === -1) {
+                $('.info_show').html('<div class="alert alert-danger">' +
+                  '<strong>提示!</strong> 登录名未填写或填写文本不包含@符号。' +
+                  '</div>')
+                $("#login_slider").slider('restore');
+                $('#register_btn').addClass('disabled');
+              } else if (real_name === "") {
+                $('.info_show').html('<div class="alert alert-danger">' +
+                  '<strong>提示!</strong> 用户名未填写。' +
+                  '</div>')
+                $("#login_slider").slider('restore');
+                $('#register_btn').addClass('disabled');
+              } else if (password === "") {
+                $('.info_show').html('<div class="alert alert-danger">' +
+                  '<strong>提示!</strong> 密码未填写。' +
+                  '</div>')
+                $("#login_slider").slider('restore');
+                $('#register_btn').addClass('disabled');
+              } else if (birthday === "") {
+                $('.info_show').html('<div class="alert alert-danger">' +
+                  '<strong>提示!</strong> 出生日期未填写或填写不规范。' +
+                  '</div>')
+                $("#login_slider").slider('restore');
+                $('#register_btn').addClass('disabled');
+              } else if (sex === undefined) {
+                $('.info_show').html('<div class="alert alert-danger">' +
+                  '<strong>提示!</strong> 未选择性别。' +
+                  '</div>')
+                $("#login_slider").slider('restore');
+                $('#register_btn').addClass('disabled');
+              } else if (addr_county === "") {
+                $('.info_show').html('<div class="alert alert-danger">' +
+                  '<strong>提示!</strong> 未选择用户所在县。' +
+                  '</div>')
+                $("#login_slider").slider('restore');
+                $('#register_btn').addClass('disabled');
+              } else if (addr_township === "") {
+                $('.info_show').html('<div class="alert alert-danger">' +
+                  '<strong>提示!</strong> 未选择用户所在乡。' +
+                  '</div>')
+                $("#login_slider").slider('restore');
+                $('#register_btn').addClass('disabled');
+              } else if (question === "" || answer === "") {
+                $('.info_show').html('<div class="alert alert-danger">' +
+                  '<strong>提示!</strong> 密保问题及答案设置不完整。' +
+                  '</div>')
+                $("#login_slider").slider('restore');
+                $('#register_btn').addClass('disabled');
+              } else if (email_code === "") {
+                $('.info_show').html('<div class="alert alert-danger">' +
+                  '<strong>提示!</strong> 未填写邮箱验证码。' +
+                  '</div>')
+                $("#login_slider").slider('restore');
+                $('#register_btn').addClass('disabled');
+              } else {
+                var form_json = {
+                  username: username,
+                  real_name: real_name,
+                  password: password,
+                  birthday: birthday,
+                  sex: sex,
+                  addr_provence: addr_provence,
+                  addr_zhou: addr_zhou,
+                  addr_county: addr_county,
+                  addr_township: addr_township,
+                  question: question,
+                  answer: answer,
+                  email_code: email_code
+                }
+                $.ajax({
+                  method: 'post',
+                  async: true,
+                  cache: false,
+                  // 数据类型必须为application/x-www-form-urlencoded之外的类型
+                  contentType: 'application/json;charset=utf-8',
+                  dataType: "json", // 数据返回类型
+                  url: '/api/user/register',
+                  data: JSON.stringify(form_json),
+                  success: function (res) {
+                    if (res.register_status === 'SUCCESS') {
+                      alert('注册成功，即将跳转到首页。')
+                      window.open('/', '_top')
+                    } else {
+                      alert(res.message)
+                      $("#login_slider").slider('restore');
+                      $('#register_btn').addClass('disabled');
+                    }
+                  },
+                  error: function () {
+                    console.log('error');
+                  }
+                });
+              }
+            })
+          })
+        </script>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

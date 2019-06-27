@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="Shortcut Icon" href="/images/favicon.ico">
+  <meta charset="UTF-8">
+  <title>管理员主界面</title>
+  <link rel="stylesheet" href="/stylesheets/style.css">
+  <link rel="stylesheet" href="/stylesheets/admin_main.css">
+  <!-- 图标 -->
+  <link rel="stylesheet" href="/stylesheets/font-awesome.min.css">
+  <!-- jQuery -->
+  <script type="text/javascript" src="/javascripts/jquery-3.3.1.slim.min.js"></script>
+  <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
+  <script type="text/javascript" src="/javascripts/jquery.cookie.min.js"></script>
+  <!-- bootstrap -->
+  <link rel="stylesheet" href="/stylesheets/bootstrap.min.css">
+  <script type="text/javascript" src="/javascripts/bootstrap.min.js"></script>
+  <script type="text/javascript" src="/javascripts/popper.min.js"></script>
+  <!-- jQuery UI -->
+  <link rel="stylesheet" href="/stylesheets/jquery-ui.css">
+  <script type="text/javascript" src="/javascripts/jquery-ui.min.js"></script>
+  <!-- echarts -->
+  <script src="/javascripts/echarts.min.js"></script>
+  <script src="/javascripts/echarts-gl.min.js"></script>
+  <!-- echarts liquidfill -->
+  <script src="/javascripts/echarts-liquidfill.min.js"></script>
+  <!-- admin login -->
+  <script src="/javascripts/admin_login.js"></script>
+  <!-- socket.io -->
+  <script src="/javascripts/socket.io.js"></script>
+  <script>
+    var socket = io.connect(location.protocol + '//' + document.domain + ':8081', {
+      'reconnect': true
+    });
+  </script>
+</head>
+
+<body id='top'>
+  <div class="container main_html">
+    <div class="main_body">
+      <div class="body_head">
+        <div class="head_title_div"></div>
+        <div class="mbx float-left">
+          <nav class="breadcrumb">
+            <span class="breadcrumb-item">凉山气象预报预警系统</span>
+            <span class="breadcrumb-item">后台</span>
+            <span class="breadcrumb-item active">管理员主界面</span>
+          </nav>
+        </div>
+        <div class="user_info float-right">
+          <div class="user_font float-right">
+            <i id="user_head_font" class="fa fa-user" style="font-size:40px;color:#9C9C9C;cursor: pointer;"></i>
+            <div class="admin_operate">
+              <div class="head_img">
+                <i class="fa fa-user" style="font-size:50px;color:#9C9C9C;margin-left:12px;"></i>
+              </div>
+              <div class="admin_operate_detail">
+                <div class="list-group">
+                  <a href="#" class="list-group-item list-group-item-action disabled" id='admin_name'>admin</a>
+                  <a href="#" class="list-group-item list-group-item-action" data-toggle="modal"
+                    data-target="#change_password">修改密码</a>
+                  <a href="#" class="list-group-item list-group-item-action" data-toggle="modal"
+                    data-target="#login_out">退出</a>
+                </div>
+                <!-- <script>
+                $('.admin_operate_detail').click(function(){
+                  $('.admin_operate').css('display', 'none');
+                });
+              </script> -->
+              </div>
+              <!-- 模态框 -->
+              <div class="modal fade" id="login_out">
+                <div class="modal-dialog modal-sm">
+                  <div class="modal-content">
+                    <!-- 模态框头部 -->
+                    <div class="modal-header">
+                      <h4 class="modal-title">退出提示</h4>
+                      <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <!-- 模态框主体 -->
+                    <div class="modal-body">
+                      是否退出登录状态？
+                    </div>
+                    <!-- 模态框底部 -->
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-primary" id="login_out_btn">确认</button>
+                      <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                    </div>
+                    <script>
+                      $('#login_out_btn').click(function () {
+                        $.ajax({
+                          method: 'post',
+                          async: false,
+                          cache: false,
+                          xhrFields: {
+                            withCredentials: true
+                          },
+                          crossDomain: true,
+                          dataType: "json",
+                          url: '/api/admin/login_out',
+                          data: {},
+                          success: function (res) {
+                            $.cookie('session_id', '', {
+                              expires: -1
+                            })
+                            window.open('/admin', target = '_self');
+                          },
+                          error: function () {
+                            console.log('error');
+                          }
+                        })
+                      });
+                    </script>
+                  </div>
+                </div>
+              </div>
+              <div class="modal fade" id="change_password" style="margin-top:15%;">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <!-- 模态框头部 -->
+                    <div class="modal-header">
+                      <h4 class="modal-title">修改管理员密码</h4>
+                      <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <!-- 模态框主体 -->
+                    <div class="modal-body">
+                      <form>
+                        <div class="form-group">
+                          <label for="pwd">旧密码：</label>
+                          <input type="password" class="form-control" id="old_pwd" name="old_pwd" maxlength="20">
+                        </div>
+                        <div class="form-group">
+                          <label for="pwd">新密码：</label>
+                          <input type="password" class="form-control" id="new_pwd" name="new_pwd" maxlength="20">
+                        </div>
+                        <div class="form-group">
+                          <label for="pwd">再次输入新密码：</label>
+                          <input type="password" class="form-control" id="new_pwd_t" name="new_pwd_t" maxlength="20">
+                        </div>
+                        <button type="button" class="btn btn-primary btn-block btn-lg" id="change_pwd">修改密码</button>
+                      </form>
+                      <script>
+                        $('#change_pwd').click(function () {
+                          var old_pwd = $('#old_pwd').val().replace(' ', '');
+                          var new_pwd = $('#new_pwd').val().replace(' ', '');
+                          var new_pwd_t = $('#new_pwd_t').val().replace(' ', '');
+                          if (old_pwd === '' || new_pwd === '' || new_pwd_t === '') {
+                            var mes_div_html = '' +
+                              '<div class="alert alert-warning">' +
+                              '<strong>警告!</strong> 请输入旧密码及新密码！' +
+                              '</div>';
+                            $('#pwd_modal_footer').html(mes_div_html);
+                            setTimeout(function () {
+                              var html_str = '<div class="alert alert-info alert-dismissible">' +
+                                '<strong>系统提示：</strong> 请谨慎使用此功能！' +
+                                ' </div>';
+                              $('#pwd_modal_footer').html(html_str);
+                            }, 2000);
+                          } else if (new_pwd !== new_pwd_t) {
+                            var mes_div_html = '' +
+                              '<div class="alert alert-warning">' +
+                              '<strong>警告!</strong> 两次输入的密码不相同！' +
+                              '</div>';
+                            $('#pwd_modal_footer').html(mes_div_html);
+                            setTimeout(function () {
+                              var html_str = '<div class="alert alert-info alert-dismissible">' +
+                                '<strong>系统提示：</strong> 请谨慎使用此功能！' +
+                                ' </div>';
+                              $('#pwd_modal_footer').html(html_str);
+                            }, 2000);
+                          } else {
+                            $.ajax({
+                              method: 'post',
+                              async: false,
+                              cache: false,
+                              xhrFields: {
+                                withCredentials: true
+                              },
+                              crossDomain: true,
+                              dataType: "json",
+                              url: '/api/admin/change_password',
+                              data: {
+                                "old_pwd": old_pwd,
+                                "new_pwd": new_pwd
+                              },
+                              success: function (res) {
+                                console.log(res);
+                                if (res.login_stat === "ERROR") {
+                                  var mes_div_html = '' +
+                                    '<div class="alert alert-danger">' +
+                                    '<strong>错误：</strong> 用户登录过期!' +
+                                    '</div>';
+                                  $('#pwd_modal_footer').html(mes_div_html);
+                                  setTimeout(function () {
+                                    window.open('/admin', target = '_self');
+                                  }, 1000);
+                                } else if (res.stats === "SUCCESS") {
+                                  var mes_div_html = '' +
+                                    '<div class="alert alert-success">' +
+                                    '<strong>密码修改成功!</strong>' +
+                                    '</div>';
+                                  $('#pwd_modal_footer').html(mes_div_html);
+                                  setTimeout(function () {
+                                    $('#change_password').modal('hide');
+                                    var html_str = '<div class="alert alert-info alert-dismissible">' +
+                                      '<strong>系统提示：</strong> 请谨慎使用此功能！' +
+                                      ' </div>';
+                                    $('#pwd_modal_footer').html(html_str);
+                                  }, 1000);
+                                } else if (res.stats === "NOLOGIN") {
+                                  var mes_div_html = '' +
+                                    '<div class="alert alert-danger">' +
+                                    '<strong>错误!</strong>' + res.msg +
+                                    '</div>';
+                                  $('#pwd_modal_footer').html(mes_div_html);
+                                  setTimeout(function () {
+                                    window.open('/admin', target = '_self');
+                                  }, 1000);
+                                } else {
+                                  var mes_div_html = '' +
+                                    '<div class="alert alert-danger">' +
+                                    '<strong>错误!</strong>' + res.msg +
+                                    '</div>';
+                                  $('#pwd_modal_footer').html(mes_div_html);
+                                  setTimeout(function () {
+                                    var html_str = '<div class="alert alert-info alert-dismissible">' +
+                                      '<strong>系统提示：</strong> 请谨慎使用此功能！' +
+                                      ' </div>';
+                                    $('#pwd_modal_footer').html(html_str);
+                                  }, 2000);
+                                }
+                              },
+                              error: function () {
+                                console.log('error');
+                              }
+                            })
+                          }
+                        });
+                      </script>
+                    </div>
+                    <!-- 模态框底部 -->
+                    <div class="modal-footer" id="pwd_modal_footer">
+                      <div class="alert alert-info alert-dismissible">
+                        <strong>系统提示：</strong>请谨慎使用此功能！
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <script>
+              $(document).ready(function () {
+                $("#user_head_font").click(function () {
+                  $(".admin_operate").toggle(500);
+                });
+              });
+            </script>
+          </div>
+        </div>
+        <script>
+          $('#user_head_font').mousemove(function () {
+            $('#user_head_font').css('color', '#4F4F4F')
+
+          });
+          $('#user_head_font').mouseleave(function () {
+            $('#user_head_font').css('color', '#9C9C9C')
+          });
+        </script>
+      </div>
+      <div class="body_body">
+        <div class="admin_other_info">
+          <div class="admin_other_info_detail">
+            <table class="table table-info table-hover" id="admin_login_info">
+            </table>
+          </div>
+          <script>
+            $.ajax({
+              method: 'get',
+              async: false,
+              cache: false,
+              xhrFields: {
+                withCredentials: true
+              },
+              crossDomain: true,
+              dataType: "json",
+              url: '/api/admin/get_login_info',
+              success: function (res) {
+                tbody_html = '<tbody>'
+                var res_n = res[0];
+                tbody_html += '<tr>' +
+                  '<td>本次登录时间：</td>' +
+                  '<td>' + res_n.date + '</td>' +
+                  '</tr>' +
+                  '<tr>' +
+                  '<td>本次登录IP：</td>' +
+                  '<td>' + res_n.ip + '</td>' +
+                  '</tr>' +
+                  '<tr>' +
+                  '<td>本次登录地址：</td>' +
+                  '<td>' + res_n.addr + '</td>' +
+                  '</tr>'
+                if (res.length > 1) {
+                  var res_f = res[1];
+                  tbody_html += '<tr>' +
+                    '<td>上次登录时间：</td>' +
+                    '<td>' + res_f.date + '</td>' +
+                    '</tr>' +
+                    '<tr>' +
+                    '<td>上次登录IP：</td>' +
+                    '<td>' + res_f.ip + '</td>' +
+                    '</tr>' +
+                    '<tr>' +
+                    '<td>上次登录地址：</td>' +
+                    '<td>' + res_f.addr + '</td>' +
+                    '</tr>'
+                }
+                tbody_html += '</tbody>';
+                $('#admin_login_info').html(tbody_html);
+              },
+              error: function () {
+                console.log('error');
+              }
+            })
+          </script>
+        </div>
+        <div class="uptime_charts_detail">
+          <h4>系统已运行： <code>0</code> 天 <code>0</code> 时 <code>0</code> 分 <code>0</code> 秒</h4>
+        </div>
+
+        <div class="cpu_charts" id="cpu">
+          <span class="cpu_charts_title">CPU负载</span>
+          <div id="cpu_charts_detail" class="cpu_charts_detail"></div>
+          <script>
+            var cpu_chart = echarts.init(document.getElementById('cpu_charts_detail'));
+            var data_cpu = [];
+            var cpu_option = {
+              title: {
+                text: ''
+              },
+              tooltip: {
+                trigger: 'axis',
+                formatter: function (params) {
+                  params = params[0];
+                  return '时间：' + params.value[0] + '<br/> CPU负载： ' + params.value[1] + '%';
+                },
+                axisPointer: {
+                  animation: false
+                }
+              },
+              grid: {
+                top: 40, //距离容器上边界40像素
+                bottom: 30, //距离容器下边界30像素
+                left: 40,
+                rigth: 20,
+              },
+              xAxis: {
+                type: 'time',
+                splitLine: {
+                  show: false
+                },
+              },
+              yAxis: {
+                type: 'value',
+                boundaryGap: [0, "100%"],
+                splitLine: {
+                  show: false
+                },
+                max: 100,
+                name: '百分比/%',
+              },
+              series: [{
+                name: '模拟数据',
+                type: 'line',
+                showSymbol: false,
+                hoverAnimation: false,
+                data: data_cpu,
+                color: '#ecd132',
+              }]
+            };
+            // 初始化
+            cpu_chart.setOption(cpu_option);
+          </script>
+        </div>
+        <br>
+
+        <div class="memery_charts" id='mem'>
+          <span class="memery_charts_title">内存负载</span>
+          <div id="memery_charts_detail" class="memery_charts_detail"></div>
+          <script>
+            var mem_chart = echarts.init(document.getElementById('memery_charts_detail'));
+            var data_mem = [];
+            var mem_option = {
+              title: {
+                text: ''
+              },
+              tooltip: {
+                trigger: 'axis',
+                formatter: function (params) {
+                  params = params[0];
+                  return '时间：' + params.value[0] + '<br/> 内存负载： ' + params.value[1] + '%';
+                },
+                axisPointer: {
+                  animation: false
+                }
+              },
+              grid: {
+                top: 40, //距离容器上边界40像素
+                bottom: 30, //距离容器下边界30像素
+                left: 40,
+                rigth: 20,
+              },
+              xAxis: {
+                type: 'time',
+                splitLine: {
+                  show: false
+                },
+              },
+              yAxis: {
+                type: 'value',
+                boundaryGap: [0, "100%"],
+                splitLine: {
+                  show: false
+                },
+                max: 100,
+                name: '百分比/%',
+              },
+              series: [{
+                name: '模拟数据',
+                type: 'line',
+                showSymbol: false,
+                hoverAnimation: false,
+                data: data_mem,
+                color: '#ecd132',
+              }]
+            };
+            // 初始化
+            mem_chart.setOption(mem_option);
+          </script>
+        </div>
+        <br>
+
+        <div class="loadavg_charts" id='loadavg'>
+          <span class="loadavg_charts_title">系统负载</span>
+          <div id="loadavg_charts_detail" class="loadavg_charts_detail"></div>
+          <script>
+            var loadavg_chart = echarts.init(document.getElementById('loadavg_charts_detail'));
+            var data_loadavg = [];
+            var loadavg_option = {
+              title: {
+                text: ''
+              },
+              tooltip: {
+                trigger: 'axis',
+                formatter: function (params) {
+                  params = params[0];
+                  return '时间：' + params.value[0] + '<br/> 系统负载： ' + params.value[1];
+                },
+                axisPointer: {
+                  animation: false
+                }
+              },
+              grid: {
+                top: 40, //距离容器上边界40像素
+                bottom: 30, //距离容器下边界30像素
+                left: 40,
+                rigth: 20,
+              },
+              xAxis: {
+                type: 'time',
+                splitLine: {
+                  show: false
+                },
+              },
+              yAxis: {
+                type: 'value',
+                boundaryGap: [0, "100%"],
+                splitLine: {
+                  show: false
+                },
+                name: '负载',
+              },
+              series: [{
+                name: '模拟数据',
+                type: 'line',
+                showSymbol: false,
+                hoverAnimation: false,
+                data: data_loadavg,
+                color: '#ecd132',
+              }]
+            };
+            // 初始化
+            loadavg_chart.setOption(loadavg_option);
+          </script>
+        </div>
+        <br>
+
+        <div class="net_charts" id='net'>
+          <span class="net_charts_title">网络流量</span>
+          <div id="net_charts_detail" class="net_charts_detail"></div>
+          <script>
+            var net_chart = echarts.init(document.getElementById('net_charts_detail'));
+            var data_Receive = [];
+            var data_Transmit = [];
+            var net_option = {
+              title: {
+                text: ''
+              },
+              tooltip: {
+                trigger: 'axis',
+                formatter: function (params) {
+                  var ret_html = '时间：' + params[0].value[0] + '<br/>';
+                  for (var i = 0; i < params.length; i++) {
+                    var val_tmp = params[i].value;
+                    ret_html += val_tmp[2] + '流量： ' + val_tmp[1] + 'KB' + '<br/>';
+                  }
+                  return ret_html;
+                },
+                axisPointer: {
+                  animation: false
+                }
+              },
+              grid: {
+                top: 40, //距离容器上边界40像素
+                bottom: 30, //距离容器下边界30像素
+                left: 40,
+                rigth: 20,
+              },
+              xAxis: {
+                type: 'time',
+                splitLine: {
+                  show: false
+                },
+              },
+              yAxis: {
+                type: 'value',
+                boundaryGap: [0, "100%"],
+                splitLine: {
+                  show: false
+                },
+                name: 'KB',
+              },
+              series: [{
+                name: '模拟数据',
+                type: 'line',
+                showSymbol: false,
+                hoverAnimation: false,
+                data: data_Receive,
+                color: '#ecd132',
+              }, {
+                name: '模拟数据',
+                type: 'line',
+                showSymbol: false,
+                hoverAnimation: false,
+                data: data_Transmit,
+                color: '#ecd132',
+              }]
+            };
+            // 初始化
+            net_chart.setOption(net_option);
+          </script>
+        </div>
+        <br>
+
+        <div class="disk_charts float-left" id='disk'>
+          <span class="disk_charts_title">磁盘使用情况</span>
+          <div id="disk_charts_detail" class="disk_charts_detail"></div>
+          <script>
+            var disk_chart = echarts.init(document.getElementById('disk_charts_detail'));
+            var data_disk = [0, 0, 0, 0, 0];
+            var disk_option = {
+              backgroundColor: '#9C9C9C',
+              series: [{
+                type: 'liquidFill',
+                radius: '80%',
+                data: data_disk,
+                backgroundStyle: {
+                  borderWidth: 5,
+                  color: '#DDD'
+                },
+                label: {
+                  normal: {
+                    formatter: '磁盘已使用：0%',
+                    textStyle: {
+                      fontSize: 25
+                    }
+                  }
+                }
+              }]
+            };
+            // 初始化
+            disk_chart.setOption(disk_option);
+          </script>
+        </div>
+        <br>
+
+        <script>
+          var session_id = $.cookie('session_id');
+          socket.on('connect', function () {
+            console.log('connect...');
+            socket.emit('centos_all_info', {
+              'session_id': session_id
+            });
+            socket.on('ret_info', function (ret) {
+              if (ret.code === 'error') {
+                window.open('/admin', target = '_self');
+              } else if (ret.code === 'success') {
+                // cpu
+                var new_ret_cpu = {
+                  now: ret.date,
+                  value: [ret.date, (ret.msg.cpu * 100).toFixed(2)]
+                };
+                data_cpu.push(new_ret_cpu);
+                if (data_cpu.length >= 20) {
+                  data_cpu.splice(0, 1);
+                }
+                cpu_chart.setOption({
+                  series: [{
+                    data: data_cpu
+                  }]
+                });
+                // memery
+                var new_ret_mem = {
+                  now: ret.date,
+                  value: [ret.date, (ret.msg.mem * 100).toFixed(2)]
+                };
+                data_mem.push(new_ret_mem);
+                if (data_mem.length >= 20) {
+                  data_mem.splice(0, 1);
+                }
+                mem_chart.setOption({
+                  series: [{
+                    data: data_mem
+                  }]
+                });
+                // loadavg
+                var new_ret_load = {
+                  now: ret.date,
+                  value: [ret.date, ret.msg.loadavg]
+                };
+                data_loadavg.push(new_ret_load);
+                if (data_loadavg.length >= 20) {
+                  data_loadavg.splice(0, 1);
+                }
+                loadavg_chart.setOption({
+                  series: [{
+                    data: data_loadavg
+                  }]
+                });
+                // net
+                var Receive = ret.msg.net.Receive;
+                var Transmit = ret.msg.net.Transmit;
+                var new_ret_Receive = {
+                  now: ret.date,
+                  value: [ret.date, (Receive / 1024).toFixed(2), '接收'],
+                  type: '接收'
+                };
+                data_Receive.push(new_ret_Receive);
+                var new_ret_Transmit = {
+                  now: ret.date,
+                  value: [ret.date, (Transmit / 1024).toFixed(2), '发送'],
+                  type: '发送'
+                };
+                data_Transmit.push(new_ret_Transmit);
+
+                if (data_Receive.length >= 20) {
+                  data_Receive.splice(0, 1);
+                }
+                if (data_Transmit.length >= 20) {
+                  data_Transmit.splice(0, 1);
+                }
+                net_option.series[0].data = data_Receive;
+                net_option.series[1].data = data_Transmit;
+                net_chart.setOption(net_option);
+                // uptime
+                var uptime_val = ret.msg.uptime;
+                var uptime_html = '<h4>系统已运行： <code>' + uptime_val['day'] + '</code> 天 <code>' + uptime_val[
+                    'hour'] +
+                  '</code> 时 <code>' + uptime_val['minute'] + '</code> 分 <code>' + uptime_val['second'] +
+                  '</code> 秒</h4>'
+                $('.uptime_charts_detail').html(uptime_html);
+                // disk
+                data_disk = [];
+                for (var i = 0; i < 5; i++) {
+                  data_disk.push(ret.msg.disk.toFixed(3));
+                }
+                disk_chart.setOption({
+                  series: [{
+                    data: data_disk,
+                    label: {
+                      normal: {
+                        formatter: '磁盘已使用：' + (data_disk[0] * 100).toFixed(2) + '%'
+                      }
+                    }
+                  }]
+                });
+              }
+              // 向服务端发送请求
+              socket.emit('centos_all_info', {
+                'session_id': session_id
+              });
+            });
+          });
+          socket.on('disconnect', function () {
+            console.log('connection is close!');
+          });
+
+          // ======================================== \\
+
+          socket.on('connect', function (data) {
+            onlineFlag = true;
+            console.log(data + ' - connect');
+          });
+          socket.on('connect_error', function (data) {
+            console.log(data + ' - connect_error');
+          });
+          socket.on('connect_timeout', function (data) {
+            console.log(data + ' - connect_timeout');
+          });
+          socket.on('error', function (data) {
+            console.log(data + ' - error');
+          });
+          socket.on('disconnect', function (data) {
+            onlineFlag = false;
+            console.log(data + ' - disconnect');
+          });
+          socket.on('reconnect', function (data) {
+            console.log(data + ' - reconnect');
+          });
+          socket.on('reconnect_attempt', function (data) {
+            console.log(data + ' - reconnect_attempt');
+          });
+          socket.on('reconnecting', function (data) {
+            console.log(data + ' - reconnecting');
+          });
+          socket.on('reconnect_error', function (data) {
+            console.log(data + ' - reconnect_error');
+          });
+          socket.on('reconnect_failed', function (data) {
+            console.log(data + ' - reconnect_failed');
+          });
+          socket.on('ping', function (data) {
+            console.log(data + ' - ping');
+          });
+          socket.on('pong', function (data) {
+            console.log(data + ' - pong');
+          });
+          // ======================================== \\
+        </script>
+        <div class="collect_charts float-left" id='collect'>
+          <div class="collect_pie" id="collect_pie">
+          </div>
+          <div class="collect_detail">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>数据项</th>
+                  <th>详细信息</th>
+                </tr>
+              </thead>
+              <tbody id="collect_detail_table">
+              </tbody>
+            </table>
+          </div>
+          <script>
+            //字符串转日期格式，strDate要转为日期格式的字符串 
+            function getDate(strDate) {
+              var st = strDate;
+              var a = st.split(" ");
+              var b = a[0].split("-");
+              var c = a[1].split(":");
+              var date_time = (new Date(b[0], b[1], b[2], c[0], c[1], c[2])).getTime();
+              return date_time;
+            }
+            var collect_chart = echarts.init(document.getElementById('collect_pie'));
+            var data = [{
+                value: 0,
+                name: '200'
+              },
+              {
+                value: 0,
+                name: '404'
+              },
+              {
+                value: 0,
+                name: '502'
+              },
+              {
+                value: 0,
+                name: '504'
+              }
+            ];
+            var colorList = ["#45dbf7", "#f69846", "#f6d54a", "#ad46f3", "#4777f5"];
+            var collect_option = {
+              title: {
+                text: '采集信息详情',
+                // subtext: '采集信息详情',
+                x: 'left'
+              },
+              backgroundColor: '#9C9C9C',
+              tooltip: {
+                trigger: 'item',
+                formatter: "{b}: {c} 次 ({d}%)"
+              },
+              legend: {
+                orient: 'vertical',
+                textStyle: {
+                  color: '#fff',
+                  fontSize: 16,
+                },
+                left: '5%',
+                top: '60%',
+                data: ['200', '404', '502', '504']
+              },
+              series: [{
+                type: 'pie',
+                radius: ['27%', '35%'],
+                // roseType: 'radius',
+                clockwise: false,
+                z: 10,
+                itemStyle: {
+                  normal: {
+                    color: function (params) {
+                      // build a color map as your need.
+                      return colorList[params.dataIndex]
+                    },
+                    shadowBlur: 20,
+                    shadowColor: 'rgba(0, 0, 0, 0.3)'
+                  }
+                },
+                label: {
+                  normal: {
+                    formatter: '{d|{c} 次}\n{hr|}\n{d|({d}%)}',
+                    rich: {
+                      b: {
+                        fontSize: 16,
+                        color: '#fff',
+                        align: 'left',
+                        padding: 4
+                      },
+                      hr: {
+                        borderColor: '#12EABE',
+                        width: '100%',
+                        borderWidth: 2,
+                        height: 0
+                      },
+                      d: {
+                        fontSize: 16,
+                        color: '#fff',
+                        align: 'left',
+                        padding: 4
+                      },
+                      c: {
+                        fontSize: 16,
+                        color: '#fff',
+                        align: 'center',
+                        padding: 4
+                      }
+                    }
+                  }
+                },
+                labelLine: {
+                  normal: {
+                    length: 50,
+                    length2: 0,
+                    lineStyle: {
+                      width: 2
+                    }
+                  }
+                },
+                data: data
+              }]
+            };
+            collect_chart.setOption(collect_option);
+            $.ajax({
+              method: 'get',
+              async: false,
+              cache: false,
+              xhrFields: {
+                withCredentials: true
+              },
+              crossDomain: true,
+              dataType: "json",
+              url: '/api/admin/get_collect_info',
+              success: function (res) {
+                var data_end = [];
+                data_end.push({
+                  name: '200',
+                  value: res.data.response_status_200
+                });
+                data_end.push({
+                  name: '404',
+                  value: res.data.response_status_404
+                });
+                data_end.push({
+                  name: '502',
+                  value: res.data.response_status_502
+                });
+                data_end.push({
+                  name: '504',
+                  value: res.data.response_status_504
+                });
+                collect_chart.setOption({
+                  series: [{
+                    data: data_end
+                  }]
+                });
+                // table detail
+                var date_start = getDate(res.data.start_time);
+                var date_end = getDate(res.data.finish_time);
+                var use_time = parseInt((date_end - date_start) / 1000 / 60);
+                var collect_detail_html = '' +
+                  '<tr>' +
+                  '<td>请求体大小：</td>' +
+                  '<td>' + (parseInt(res.data.request_size) / 1024).toFixed(3) + ' KB</td>' +
+                  '</tr>' +
+                  '<tr>' +
+                  '<td>响应体大小：</td>' +
+                  '<td>' + (parseInt(res.data.response_size) / 1024 / 1024).toFixed(3) + ' MB</td>' +
+                  '</tr>' +
+                  '<tr>' +
+                  '<td>采集耗时：</td>' +
+                  '<td>' + use_time + ' 分钟</td>' +
+                  '</tr>'
+                $('#collect_detail_table').html(collect_detail_html);
+              },
+              error: function () {
+                console.log('error');
+              }
+            })
+          </script>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="rigth_nav">
+    <a href="#top">TOP<i class="fa fa-angle-double-up" style="font-size:24px"></i></a><br>
+    <a href="#cpu">CPU负载</a><br>
+    <a href="#mem">内存负载</a><br>
+    <a href="#loadavg">系统负载</a><br>
+    <a href="#net">网络流量</a><br>
+    <a href="#disk">磁盘信息</a><br>
+    <a href="#collect">采集信息</a><br>
+  </div>
+  </div>
+</body>
+
+</html>
